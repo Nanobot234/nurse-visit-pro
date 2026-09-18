@@ -92,10 +92,22 @@ function NotePage() {
 
   const save = async (status: "draft" | "completed") => {
     if (status === "completed") {
-      if (!patientName.trim()) return toast.error("Enter the patient's name before completing.");
-      if (!visitDate) return toast.error("Enter the visit date before completing.");
-      if (!nurseSig) return toast.error("The nurse's signature is required.");
-      if (aidePresent && !aideSig) return toast.error("The aide still needs to sign.");
+      if (!patientName.trim()) {
+        toast.error("Enter the patient's name before completing.");
+        return;
+      }
+      if (!visitDate) {
+        toast.error("Enter the visit date before completing.");
+        return;
+      }
+      if (!nurseSig) {
+        toast.error("The nurse's signature is required.");
+        return;
+      }
+      if (aidePresent && !aideSig) {
+        toast.error("The aide still needs to sign.");
+        return;
+      }
     }
     setSaving(true);
     try {
