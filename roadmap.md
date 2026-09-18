@@ -1,9 +1,12 @@
-# JARME Nursing Visit Notes Portal
+# Roadmap
 
-- [ ] Enable Lovable Cloud (database + auth)
-- [ ] Auth: email + phone login, nurse/admin roles
-- [ ] Database: visit_notes table, user_roles, RLS
-- [ ] Visit note form driven by an editable field config (user will extend this part)
-- [ ] Hand-drawn signature pad: nurse + aide, both on one device
-- [ ] Admin: search completed notes by patient name, view full note
-- [ ] Design system + head metadata per route
+- [x] Enable Lovable Cloud + email auth
+- [x] Database: profiles, user_roles, visit_notes + RLS
+- [x] Login by email and phone code
+- [x] Editable form config (src/lib/visit-note-schema.ts)
+- [x] Hand-drawn signature pad (nurse + aide)
+- [x] Nurse dashboard: drafts and completed notes
+- [x] Visit note page: form + supervision checklist + both signatures
+- [x] Admin view: search all notes by patient name
+- [ ] Blocked: phone sign-in needs an SMS provider configured in Cloud auth settings
+- [ ] User to extend the form fields in src/lib/visit-note-schema.ts
