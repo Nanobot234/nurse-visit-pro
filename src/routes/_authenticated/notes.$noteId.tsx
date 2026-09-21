@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { visitNoteSections, supervisionItems } from "@/lib/visit-note-schema";
+import { visitNoteSections, supervisionItems, allFields } from "@/lib/visit-note-schema";
 import { NoteFieldInput } from "@/components/NoteField";
 import { SignaturePad, SignatureImage } from "@/components/SignaturePad";
 import { useStaff } from "@/components/AppShell";
@@ -98,6 +98,11 @@ function NotePage() {
       }
       if (!visitDate) {
         toast.error("Enter the visit date before completing.");
+        return;
+      }
+      const missing = allFields.filter((f) => f.required && !(answers[f.key] ?? "").trim());
+      if (missing.length > 0) {
+        toast.error(`Please fill in before completing: ${missing.map((f) => f.label).join(", ")}`);
         return;
       }
       if (!nurseSig) {

@@ -17,6 +17,8 @@
  *    type        "text" (default) | "textarea" | "date" | "yesno"
  *    suggestions optional one-tap answers shown as buttons above the box.
  *    width       "full" makes the field span the whole row.
+ *    required    true = the nurse cannot complete the note until this field
+ *                is filled in (drafts can still be saved without it).
  *
  *  A section groups fields under a heading. `columns` is how many fields sit
  *  side by side on a large screen (1, 2 or 3).
@@ -31,6 +33,7 @@ export interface NoteField {
   suggestions?: string[];
   width?: "full";
   placeholder?: string;
+  required?: boolean;
 }
 
 export interface NoteSection {
