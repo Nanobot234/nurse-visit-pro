@@ -186,7 +186,7 @@ function NotePage() {
                 value={answers[field.key] ?? ""}
                 onChange={(v) => setAnswer(field.key, v)}
                 readOnly={readOnly}
-                error={missingKeys.has(feild.key) ? "This field is required" : undefined}
+                error={missingKeys.has(field.key) ? "This field is required" : undefined}
               />
             ))}
           </div>

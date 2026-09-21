@@ -8,8 +8,8 @@ interface Props {
   field: NoteField;
   value: string;
   onChange: (value: string) => void;
-  readOnly?: boolean;
-  error?: string;
+  readOnly?: boolean | undefined;
+  error?: string | undefined;
 }
 
 //The notes that can be written for each health metric is editable
