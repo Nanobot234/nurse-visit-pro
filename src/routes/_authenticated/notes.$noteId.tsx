@@ -78,7 +78,18 @@ function NotePage() {
   const isOwner = staff?.profile?.id === note.nurse_id;
   const readOnly = completed || !isOwner;
 
-  const setAnswer = (key: string, value: string) => setAnswers((prev) => ({ ...prev, [key]: value }));
+  const clearMissing = (key: string) =>
+    setMissingKeys((prev) => {
+      if (!prev.has(key)) return prev;
+      const next = new Set(prev);
+      next.delete(key);
+      return next;
+    });
+
+  const setAnswer = (key: string, value: string) => {
+    setAnswers((prev) => ({ ...prev, [key]: value }));
+    clearMissing(key);
+  };
 
   const setSupervisionValue = (key: string, patch: Partial<{ answer: string; comment: string }>) =>
     setSupervision((prev) => ({
