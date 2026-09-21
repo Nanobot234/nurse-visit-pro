@@ -8,8 +8,8 @@ interface Props {
   field: NoteField;
   value: string;
   onChange: (value: string) => void;
-  readOnly?: boolean;
-  error?: string;
+  readOnly?: boolean | undefined;
+  error?: string | undefined;
 }
 
 //The notes that can be written for each health metric is editable
@@ -29,7 +29,7 @@ export function NoteFieldInput({ field, value, onChange, readOnly, error }: Prop
     <div className={cn("space-y-2", field.width === "full" && "sm:col-span-full")}>
       <Label htmlFor={id}>
         {field.label}
-        {field.required && <span className="text-destructive"></span>}
+        {field.required && <span className="text-destructive"> *</span>}
       </Label>
       {field.suggestions?.length ? (
         <div className="flex flex-wrap gap-1.5">

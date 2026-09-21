@@ -54,6 +54,7 @@ function NotePage() {
   const [aideSig, setAideSig] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [ready, setReady] = useState(false);
+  const [missingKeys, setMissingKeys] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (!note || ready) return;
@@ -77,7 +78,18 @@ function NotePage() {
   const isOwner = staff?.profile?.id === note.nurse_id;
   const readOnly = completed || !isOwner;
 
-  const setAnswer = (key: string, value: string) => setAnswers((prev) => ({ ...prev, [key]: value }));
+  const clearMissing = (key: string) =>
+    setMissingKeys((prev) => {
+      if (!prev.has(key)) return prev;
+      const next = new Set(prev);
+      next.delete(key);
+      return next;
+    });
+
+  const setAnswer = (key: string, value: string) => {
+    setAnswers((prev) => ({ ...prev, [key]: value }));
+    clearMissing(key);
+  };
 
   const setSupervisionValue = (key: string, patch: Partial<{ answer: string; comment: string }>) =>
     setSupervision((prev) => ({
@@ -87,19 +99,22 @@ function NotePage() {
 
   const save = async (status: "draft" | "completed") => {
     if (status === "completed") {
-      if (!patientName.trim()) {
-        toast.error("Enter the patient's name before completing.");
+      const failed = new Set<string>();
+      if (!patientName.trim()) failed.add("patientName");
+      if (!visitDate) failed.add("visitDate");
+      for (const f of allFields) {
+        if (f.required && !(answers[f.key] ?? "").trim()) failed.add(f.key);
+      }
+      if (failed.size > 0) {
+        setMissingKeys(failed);
+        const labels: string[] = [];
+        if (failed.has("patientName")) labels.push("patient's name");
+        if (failed.has("visitDate")) labels.push("visit date");
+        labels.push(...allFields.filter((f) => failed.has(f.key)).map((f) => f.label));
+        toast.error(`Please fill in before completing: ${labels.join(", ")}`);
         return;
       }
-      if (!visitDate) {
-        toast.error("Enter the visit date before completing.");
-        return;
-      }
-      const missing = allFields.filter((f) => f.required && !(answers[f.key] ?? "").trim());
-      if (missing.length > 0) {
-        toast.error(`Please fill in before completing: ${missing.map((f) => f.label).join(", ")}`);
-        return;
-      }
+      setMissingKeys(new Set());
       if (!nurseSig) {
         toast.error("The nurse's signature is required.");
         return;
@@ -156,14 +171,40 @@ function NotePage() {
 
       <Section title="Patient">
         <div className="grid gap-4 sm:grid-cols-3">
-          <Field label="Patient's name" readOnly={readOnly} value={patientName}>
-            <Input value={patientName} maxLength={120} onChange={(e) => setPatientName(e.target.value)} />
+          <Field
+            label="Patient's name"
+            required
+            readOnly={readOnly}
+            value={patientName}
+            error={missingKeys.has("patientName") ? "This field is required" : undefined}
+          >
+            <Input
+              value={patientName}
+              maxLength={120}
+              onChange={(e) => {
+                setPatientName(e.target.value);
+                clearMissing("patientName");
+              }}
+            />
           </Field>
           <Field label="ID #" readOnly={readOnly} value={patientId}>
             <Input value={patientId} maxLength={60} onChange={(e) => setPatientId(e.target.value)} />
           </Field>
-          <Field label="Visit date" readOnly={readOnly} value={visitDate}>
-            <Input type="date" value={visitDate} onChange={(e) => setVisitDate(e.target.value)} />
+          <Field
+            label="Visit date"
+            required
+            readOnly={readOnly}
+            value={visitDate}
+            error={missingKeys.has("visitDate") ? "This field is required" : undefined}
+          >
+            <Input
+              type="date"
+              value={visitDate}
+              onChange={(e) => {
+                setVisitDate(e.target.value);
+                clearMissing("visitDate");
+              }}
+            />
           </Field>
         </div>
       </Section>
@@ -185,7 +226,7 @@ function NotePage() {
                 value={answers[field.key] ?? ""}
                 onChange={(v) => setAnswer(field.key, v)}
                 readOnly={readOnly}
-                error={missingKeys.has(feild.key) ? "This field is required" : undefined}
+                error={missingKeys.has(field.key) ? "This field is required" : undefined}
               />
             ))}
           </div>
@@ -330,17 +371,25 @@ function Field({
   label,
   value,
   readOnly,
+  required,
+  error,
   children,
 }: {
   label: string;
   value: string;
-  readOnly?: boolean;
+  readOnly?: boolean | undefined;
+  required?: boolean | undefined;
+  error?: string | undefined;
   children: React.ReactNode;
 }) {
   return (
     <div className="space-y-2">
-      <Label>{label}</Label>
+      <Label>
+        {label}
+        {required && <span className="text-destructive"> *</span>}
+      </Label>
       {readOnly ? <p className="text-foreground">{value || "—"}</p> : children}
+      {error && !readOnly && <p className="text-xs text-destructive">{error}</p>}
     </div>
   );
 }
