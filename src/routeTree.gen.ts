@@ -15,6 +15,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedPatientsRouteImport } from './routes/_authenticated/patients'
+import { Route as AuthenticatedProgressRouteImport } from './routes/_authenticated/progress'
 import { Route as AuthenticatedNotesNoteIdRouteImport } from './routes/_authenticated/notes.$noteId'
 
 const IndexRoute = IndexRouteImport.update({
@@ -46,6 +47,11 @@ const AuthenticatedPatientsRoute = AuthenticatedPatientsRouteImport.update({
   path: '/patients',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedProgressRoute = AuthenticatedProgressRouteImport.update({
+  id: '/progress',
+  path: '/progress',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedNotesNoteIdRoute =
   AuthenticatedNotesNoteIdRouteImport.update({
     id: '/notes/$noteId',
@@ -59,6 +65,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AuthenticatedAdminRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/patients': typeof AuthenticatedPatientsRoute
+  '/progress': typeof AuthenticatedProgressRoute
   '/notes/$noteId': typeof AuthenticatedNotesNoteIdRoute
 }
 export interface FileRoutesByTo {
@@ -67,6 +74,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AuthenticatedAdminRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/patients': typeof AuthenticatedPatientsRoute
+  '/progress': typeof AuthenticatedProgressRoute
   '/notes/$noteId': typeof AuthenticatedNotesNoteIdRoute
 }
 export interface FileRoutesById {
@@ -77,14 +85,28 @@ export interface FileRoutesById {
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/patients': typeof AuthenticatedPatientsRoute
+  '/_authenticated/progress': typeof AuthenticatedProgressRoute
   '/_authenticated/notes/$noteId': typeof AuthenticatedNotesNoteIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/auth' | '/admin' | '/dashboard' | '/patients' | '/notes/$noteId'
+    | '/'
+    | '/auth'
+    | '/admin'
+    | '/dashboard'
+    | '/patients'
+    | '/progress'
+    | '/notes/$noteId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/admin' | '/dashboard' | '/patients' | '/notes/$noteId'
+  to:
+    | '/'
+    | '/auth'
+    | '/admin'
+    | '/dashboard'
+    | '/patients'
+    | '/progress'
+    | '/notes/$noteId'
   id:
     | '__root__'
     | '/'
@@ -93,6 +115,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin'
     | '/_authenticated/dashboard'
     | '/_authenticated/patients'
+    | '/_authenticated/progress'
     | '/_authenticated/notes/$noteId'
   fileRoutesById: FileRoutesById
 }
@@ -146,6 +169,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPatientsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/progress': {
+      id: '/_authenticated/progress'
+      path: '/progress'
+      fullPath: '/progress'
+      preLoaderRoute: typeof AuthenticatedProgressRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/notes/$noteId': {
       id: '/_authenticated/notes/$noteId'
       path: '/notes/$noteId'
@@ -160,6 +190,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedPatientsRoute: typeof AuthenticatedPatientsRoute
+  AuthenticatedProgressRoute: typeof AuthenticatedProgressRoute
   AuthenticatedNotesNoteIdRoute: typeof AuthenticatedNotesNoteIdRoute
 }
 
@@ -167,6 +198,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedPatientsRoute: AuthenticatedPatientsRoute,
+  AuthenticatedProgressRoute: AuthenticatedProgressRoute,
   AuthenticatedNotesNoteIdRoute: AuthenticatedNotesNoteIdRoute,
 }
 
