@@ -107,11 +107,22 @@ function NotePage() {
         toast.error("Enter the visit date before completing.");
         return;
       }
-      const missing = allFields.filter((f) => f.required && !(answers[f.key] ?? "").trim());
-      if (missing.length > 0) {
-        toast.error(`Please fill in before completing: ${missing.map((f) => f.label).join(", ")}`);
+      const failed = new Set<string>();
+      if (!patientName.trim()) failed.add("patientName");
+      if (!visitDate) failed.add("visitDate");
+      for (const f of allFields) {
+        if (f.required && !(answers[f.key] ?? "").trim()) failed.add(f.key);
+      }
+      if (failed.size > 0) {
+        setMissingKeys(failed);
+        const labels: string[] = [];
+        if (failed.has("patientName")) labels.push("patient's name");
+        if (failed.has("visitDate")) labels.push("visit date");
+        labels.push(...allFields.filter((f) => failed.has(f.key)).map((f) => f.label));
+        toast.error(`Please fill in before completing: ${labels.join(", ")}`);
         return;
       }
+      setMissingKeys(new Set());
       if (!nurseSig) {
         toast.error("The nurse's signature is required.");
         return;
