@@ -77,7 +77,7 @@ function NotePage() {
 
   const completed = note.status === "completed";
   const isOwner = staff?.profile?.id === note.nurse_id;
-  const readOnly = completed || !isOwner;
+  const readOnly = !isOwner || (completed && !editing);
 
   const clearMissing = (key: string) =>
     setMissingKeys((prev) => {
