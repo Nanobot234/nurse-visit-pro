@@ -147,7 +147,10 @@ function NotePage() {
       if (error) throw error;
       queryClient.invalidateQueries({ queryKey: ["note", noteId] });
       queryClient.invalidateQueries({ queryKey: ["my-notes"] });
-      if (status === "completed") {
+      if (status === "completed" && completed) {
+        setEditing(false);
+        toast.success("Changes saved.");
+      } else if (status === "completed") {
         toast.success("Visit note completed and filed.");
         navigate({ to: "/dashboard" });
       } else {
