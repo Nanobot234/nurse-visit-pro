@@ -144,6 +144,7 @@ function NotePage() {
         .update({
           patient_name: patientName.trim(),
           patient_id_number: patientId.trim() || null,
+          patient_ref: patientRef,
           visit_date: visitDate || null,
           data: { answers, supervision },
           aide_present: aidePresent,
@@ -198,14 +199,49 @@ function NotePage() {
             value={patientName}
             error={missingKeys.has("patientName") ? "This field is required" : undefined}
           >
-            <Input
-              value={patientName}
-              maxLength={120}
-              onChange={(e) => {
-                setPatientName(e.target.value);
-                clearMissing("patientName");
-              }}
-            />
+            <div className="space-y-2">
+              <Select
+                value={patientRef ?? "manual"}
+                onValueChange={(value) => {
+                  if (value === "manual") {
+                    setPatientRef(null);
+                    return;
+                  }
+                  const picked = patients?.find((p) => p.id === value);
+                  setPatientRef(value);
+                  if (picked) {
+                    setPatientName(picked.full_name);
+                    setPatientId(picked.patient_id_number ?? "");
+                    clearMissing("patientName");
+                  }
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose a patient" />
+                </SelectTrigger>
+                <SelectContent>
+                  {(patients ?? [])
+                    .filter((p) => p.active || p.id === patientRef)
+                    .map((p) => (
+                      <SelectItem key={p.id} value={p.id}>
+                        {p.full_name}
+                      </SelectItem>
+                    ))}
+                  <SelectItem value="manual">Type a name instead</SelectItem>
+                </SelectContent>
+              </Select>
+              {!patientRef && (
+                <Input
+                  value={patientName}
+                  maxLength={120}
+                  placeholder="Patient's name"
+                  onChange={(e) => {
+                    setPatientName(e.target.value);
+                    clearMissing("patientName");
+                  }}
+                />
+              )}
+            </div>
           </Field>
           <Field label="ID #" readOnly={readOnly} value={patientId}>
             <Input value={patientId} maxLength={60} onChange={(e) => setPatientId(e.target.value)} />
