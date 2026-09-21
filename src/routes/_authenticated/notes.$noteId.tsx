@@ -53,6 +53,8 @@ function NotePage() {
 
   const [patientName, setPatientName] = useState("");
   const [patientId, setPatientId] = useState("");
+  const [patientRef, setPatientRef] = useState<string | null>(null);
+  const { data: patients } = usePatients();
   const [visitDate, setVisitDate] = useState("");
   const [answers, setAnswers] = useState<Answers>({});
   const [aidePresent, setAidePresent] = useState(false);
@@ -70,6 +72,7 @@ function NotePage() {
     const data = (note.data ?? {}) as { answers?: Answers; supervision?: Supervision };
     setPatientName(note.patient_name ?? "");
     setPatientId(note.patient_id_number ?? "");
+    setPatientRef(note.patient_ref ?? null);
     setVisitDate(note.visit_date ?? "");
     setAnswers(data.answers ?? {});
     setSupervision(data.supervision ?? {});
