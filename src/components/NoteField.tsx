@@ -9,17 +9,17 @@ interface Props {
   value: string;
   onChange: (value: string) => void;
   readOnly?: boolean;
+  error?: string;
 }
 
-export function NoteFieldInput({ field, value, onChange, readOnly }: Props) {
+//The notes that can be written for each health metric is editable
+export function NoteFieldInput({ field, value, onChange, readOnly, error }: Props) {
   const id = `field-${field.key}`;
 
   if (readOnly) {
     return (
       <div className={cn("space-y-1", field.width === "full" && "sm:col-span-full")}>
-        <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          {field.label}
-        </span>
+        <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{field.label}</span>
         <p className="whitespace-pre-wrap text-foreground">{value || "—"}</p>
       </div>
     );
@@ -27,7 +27,10 @@ export function NoteFieldInput({ field, value, onChange, readOnly }: Props) {
 
   return (
     <div className={cn("space-y-2", field.width === "full" && "sm:col-span-full")}>
-      <Label htmlFor={id}>{field.label}</Label>
+      <Label htmlFor={id}>
+        {field.label}
+        {field.required && <span className="text-destructive"></span>}
+      </Label>
       {field.suggestions?.length ? (
         <div className="flex flex-wrap gap-1.5">
           {field.suggestions.map((s) => (
@@ -66,6 +69,7 @@ export function NoteFieldInput({ field, value, onChange, readOnly }: Props) {
           onChange={(e) => onChange(e.target.value)}
         />
       )}
+      {error && !readOnly && <p className="text-xs text-destructive">{error}</p>}
     </div>
   );
 }

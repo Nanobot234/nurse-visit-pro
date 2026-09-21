@@ -37,11 +37,7 @@ function NotePage() {
   const { data: note, isLoading } = useQuery({
     queryKey: ["note", noteId],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("visit_notes")
-        .select("*")
-        .eq("id", noteId)
-        .maybeSingle();
+      const { data, error } = await supabase.from("visit_notes").select("*").eq("id", noteId).maybeSingle();
       if (error) throw error;
       return data;
     },
@@ -81,8 +77,7 @@ function NotePage() {
   const isOwner = staff?.profile?.id === note.nurse_id;
   const readOnly = completed || !isOwner;
 
-  const setAnswer = (key: string, value: string) =>
-    setAnswers((prev) => ({ ...prev, [key]: value }));
+  const setAnswer = (key: string, value: string) => setAnswers((prev) => ({ ...prev, [key]: value }));
 
   const setSupervisionValue = (key: string, patch: Partial<{ answer: string; comment: string }>) =>
     setSupervision((prev) => ({
@@ -154,9 +149,7 @@ function NotePage() {
       <header className="space-y-1">
         <div className="flex items-center gap-3">
           <h1 className="font-serif text-3xl text-foreground">Nursing visit note</h1>
-          <Badge variant={completed ? "default" : "secondary"}>
-            {completed ? "Completed" : "Draft"}
-          </Badge>
+          <Badge variant={completed ? "default" : "secondary"}>{completed ? "Completed" : "Draft"}</Badge>
         </div>
         <p className="text-muted-foreground">JARME Home &amp; Healthcare Services, Inc.</p>
       </header>
@@ -192,6 +185,7 @@ function NotePage() {
                 value={answers[field.key] ?? ""}
                 onChange={(v) => setAnswer(field.key, v)}
                 readOnly={readOnly}
+                error={missingKeys.has(feild.key) ? "This field is required" : undefined}
               />
             ))}
           </div>
@@ -254,9 +248,7 @@ function NotePage() {
                       <button
                         key={opt}
                         type="button"
-                        onClick={() =>
-                          setSupervisionValue(item.key, { answer: row.answer === opt ? "" : opt })
-                        }
+                        onClick={() => setSupervisionValue(item.key, { answer: row.answer === opt ? "" : opt })}
                         className={cn(
                           "rounded-full border px-3 py-1 text-xs transition-colors",
                           row.answer === opt
@@ -290,11 +282,7 @@ function NotePage() {
           {readOnly ? (
             <SignatureImage src={nurseSig} label="Nurse / supervisor signature" />
           ) : (
-            <SignaturePad
-              label="Nurse / supervisor signature"
-              value={nurseSig}
-              onChange={setNurseSig}
-            />
+            <SignaturePad label="Nurse / supervisor signature" value={nurseSig} onChange={setNurseSig} />
           )}
           {readOnly ? (
             <SignatureImage src={aideSig} label="Aide signature" />
