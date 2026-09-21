@@ -55,6 +55,7 @@ function NotePage() {
   const [saving, setSaving] = useState(false);
   const [ready, setReady] = useState(false);
   const [missingKeys, setMissingKeys] = useState<Set<string>>(new Set());
+  const [editing, setEditing] = useState(false);
 
   useEffect(() => {
     if (!note || ready) return;
@@ -76,7 +77,7 @@ function NotePage() {
 
   const completed = note.status === "completed";
   const isOwner = staff?.profile?.id === note.nurse_id;
-  const readOnly = completed || !isOwner;
+  const readOnly = !isOwner || (completed && !editing);
 
   const clearMissing = (key: string) =>
     setMissingKeys((prev) => {
@@ -146,7 +147,10 @@ function NotePage() {
       if (error) throw error;
       queryClient.invalidateQueries({ queryKey: ["note", noteId] });
       queryClient.invalidateQueries({ queryKey: ["my-notes"] });
-      if (status === "completed") {
+      if (status === "completed" && completed) {
+        setEditing(false);
+        toast.success("Changes saved.");
+      } else if (status === "completed") {
         toast.success("Visit note completed and filed.");
         navigate({ to: "/dashboard" });
       } else {
@@ -165,6 +169,11 @@ function NotePage() {
         <div className="flex items-center gap-3">
           <h1 className="font-serif text-3xl text-foreground">Nursing visit note</h1>
           <Badge variant={completed ? "default" : "secondary"}>{completed ? "Completed" : "Draft"}</Badge>
+          {completed && isOwner && !editing && (
+            <Button variant="outline" size="sm" onClick={() => setEditing(true)}>
+              Edit note
+            </Button>
+          )}
         </div>
         <p className="text-muted-foreground">JARME Home &amp; Healthcare Services, Inc.</p>
       </header>
@@ -336,12 +345,25 @@ function NotePage() {
       {!readOnly && (
         <div className="fixed inset-x-0 bottom-0 border-t border-border bg-card/95 backdrop-blur">
           <div className="mx-auto flex w-full max-w-5xl items-center justify-end gap-3 px-4 py-3">
-            <Button variant="outline" onClick={() => save("draft")} disabled={saving}>
-              Save draft
-            </Button>
-            <Button onClick={() => save("completed")} disabled={saving}>
-              {saving ? "Saving…" : "Complete note"}
-            </Button>
+            {completed ? (
+              <>
+                <Button variant="outline" onClick={() => setEditing(false)} disabled={saving}>
+                  Cancel
+                </Button>
+                <Button onClick={() => save("completed")} disabled={saving}>
+                  {saving ? "Saving…" : "Save changes"}
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button variant="outline" onClick={() => save("draft")} disabled={saving}>
+                  Save draft
+                </Button>
+                <Button onClick={() => save("completed")} disabled={saving}>
+                  {saving ? "Saving…" : "Complete note"}
+                </Button>
+              </>
+            )}
           </div>
         </div>
       )}

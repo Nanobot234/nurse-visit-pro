@@ -1,0 +1,2 @@
+DROP POLICY IF EXISTS "Nurses edit own drafts" ON public.visit_notes;
+CREATE POLICY "Nurses edit own notes" ON public.visit_notes FOR UPDATE TO authenticated USING (nurse_id = auth.uid()) WITH CHECK (nurse_id = auth.uid());
