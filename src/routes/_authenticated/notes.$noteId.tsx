@@ -379,17 +379,25 @@ function Field({
   label,
   value,
   readOnly,
+  required,
+  error,
   children,
 }: {
   label: string;
   value: string;
-  readOnly?: boolean;
+  readOnly?: boolean | undefined;
+  required?: boolean | undefined;
+  error?: string | undefined;
   children: React.ReactNode;
 }) {
   return (
     <div className="space-y-2">
-      <Label>{label}</Label>
+      <Label>
+        {label}
+        {required && <span className="text-destructive"> *</span>}
+      </Label>
       {readOnly ? <p className="text-foreground">{value || "—"}</p> : children}
+      {error && !readOnly && <p className="text-xs text-destructive">{error}</p>}
     </div>
   );
 }
