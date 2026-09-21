@@ -99,14 +99,6 @@ function NotePage() {
 
   const save = async (status: "draft" | "completed") => {
     if (status === "completed") {
-      if (!patientName.trim()) {
-        toast.error("Enter the patient's name before completing.");
-        return;
-      }
-      if (!visitDate) {
-        toast.error("Enter the visit date before completing.");
-        return;
-      }
       const failed = new Set<string>();
       if (!patientName.trim()) failed.add("patientName");
       if (!visitDate) failed.add("visitDate");
