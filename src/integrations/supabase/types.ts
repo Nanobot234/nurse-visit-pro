@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      patients: {
+        Row: {
+          active: boolean
+          address: string | null
+          created_at: string
+          created_by: string | null
+          date_of_birth: string | null
+          full_name: string
+          id: string
+          patient_id_number: string | null
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          address?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_of_birth?: string | null
+          full_name: string
+          id?: string
+          patient_id_number?: string | null
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          address?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_of_birth?: string | null
+          full_name?: string
+          id?: string
+          patient_id_number?: string | null
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -40,6 +79,47 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      progress_notes: {
+        Row: {
+          author_id: string
+          body: string
+          contact_type: string
+          created_at: string
+          id: string
+          occurred_at: string
+          patient_id: string
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          body?: string
+          contact_type?: string
+          created_at?: string
+          id?: string
+          occurred_at?: string
+          patient_id: string
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          body?: string
+          contact_type?: string
+          created_at?: string
+          id?: string
+          occurred_at?: string
+          patient_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "progress_notes_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
@@ -76,6 +156,7 @@ export type Database = {
           nurse_signed_at: string | null
           patient_id_number: string | null
           patient_name: string
+          patient_ref: string | null
           status: string
           updated_at: string
           visit_date: string | null
@@ -93,6 +174,7 @@ export type Database = {
           nurse_signed_at?: string | null
           patient_id_number?: string | null
           patient_name?: string
+          patient_ref?: string | null
           status?: string
           updated_at?: string
           visit_date?: string | null
@@ -110,11 +192,20 @@ export type Database = {
           nurse_signed_at?: string | null
           patient_id_number?: string | null
           patient_name?: string
+          patient_ref?: string | null
           status?: string
           updated_at?: string
           visit_date?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "visit_notes_patient_ref_fkey"
+            columns: ["patient_ref"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

@@ -43,14 +43,30 @@ export function AppShell({ children }: { children: ReactNode }) {
             >
               My notes
             </Link>
+            <Link
+              to="/progress"
+              className="text-muted-foreground hover:text-foreground"
+              activeProps={{ className: "text-foreground font-medium" }}
+            >
+              Progress notes
+            </Link>
             {staff?.isAdmin && (
-              <Link
-                to="/admin"
-                className="text-muted-foreground hover:text-foreground"
-                activeProps={{ className: "text-foreground font-medium" }}
-              >
-                All patients
-              </Link>
+              <>
+                <Link
+                  to="/patients"
+                  className="text-muted-foreground hover:text-foreground"
+                  activeProps={{ className: "text-foreground font-medium" }}
+                >
+                  Patients
+                </Link>
+                <Link
+                  to="/admin"
+                  className="text-muted-foreground hover:text-foreground"
+                  activeProps={{ className: "text-foreground font-medium" }}
+                >
+                  All notes
+                </Link>
+              </>
             )}
           </nav>
           <div className="ml-auto flex items-center gap-3">
