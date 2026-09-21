@@ -56,8 +56,10 @@ function Dashboard() {
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not start the note"),
   });
 
+  type NoteRow = NonNullable<typeof notes>[number];
+
   const groups = (() => {
-    const map = new Map<string, typeof notes extends undefined ? never : NonNullable<typeof notes>>();
+    const map = new Map<string, NoteRow[]>();
     for (const note of notes ?? []) {
       const name = note.patient_name?.trim() || "Untitled patient";
       const list = map.get(name) ?? [];
