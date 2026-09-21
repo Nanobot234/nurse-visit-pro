@@ -7,6 +7,14 @@ import { visitNoteSections, supervisionItems, allFields } from "@/lib/visit-note
 import { NoteFieldInput } from "@/components/NoteField";
 import { SignaturePad, SignatureImage } from "@/components/SignaturePad";
 import { useStaff } from "@/components/AppShell";
+import { usePatients } from "@/lib/patients";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
