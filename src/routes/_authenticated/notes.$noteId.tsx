@@ -55,6 +55,7 @@ function NotePage() {
   const [saving, setSaving] = useState(false);
   const [ready, setReady] = useState(false);
   const [missingKeys, setMissingKeys] = useState<Set<string>>(new Set());
+  const [editing, setEditing] = useState(false);
 
   useEffect(() => {
     if (!note || ready) return;
