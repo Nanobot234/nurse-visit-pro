@@ -54,8 +54,8 @@ export const visitNoteSections: NoteSection[] = [
     title: "Vital signs",
     columns: 3,
     fields: [
-      { key: "bp", label: "BP", placeholder: "120/80" },
-      { key: "ap_radial", label: "AP / Radial" },
+      { key: "bp", label: "BP", placeholder: "120/80", required: true },
+      { key: "ap_radial", label: "AP / Radial", required: true },
       { key: "resp", label: "Resp" },
       { key: "wt", label: "Wt" },
       { key: "temp", label: "Temp" },
@@ -162,9 +162,7 @@ export const visitNoteSections: NoteSection[] = [
     id: "teaching",
     title: "Teaching / coordination of care",
     columns: 1,
-    fields: [
-      { key: "teaching", label: "Teaching / coordination of care", type: "textarea", width: "full" },
-    ],
+    fields: [{ key: "teaching", label: "Teaching / coordination of care", type: "textarea", width: "full" }],
   },
 ];
 
