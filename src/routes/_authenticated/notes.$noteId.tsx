@@ -179,14 +179,40 @@ function NotePage() {
 
       <Section title="Patient">
         <div className="grid gap-4 sm:grid-cols-3">
-          <Field label="Patient's name" readOnly={readOnly} value={patientName}>
-            <Input value={patientName} maxLength={120} onChange={(e) => setPatientName(e.target.value)} />
+          <Field
+            label="Patient's name"
+            required
+            readOnly={readOnly}
+            value={patientName}
+            error={missingKeys.has("patientName") ? "This field is required" : undefined}
+          >
+            <Input
+              value={patientName}
+              maxLength={120}
+              onChange={(e) => {
+                setPatientName(e.target.value);
+                clearMissing("patientName");
+              }}
+            />
           </Field>
           <Field label="ID #" readOnly={readOnly} value={patientId}>
             <Input value={patientId} maxLength={60} onChange={(e) => setPatientId(e.target.value)} />
           </Field>
-          <Field label="Visit date" readOnly={readOnly} value={visitDate}>
-            <Input type="date" value={visitDate} onChange={(e) => setVisitDate(e.target.value)} />
+          <Field
+            label="Visit date"
+            required
+            readOnly={readOnly}
+            value={visitDate}
+            error={missingKeys.has("visitDate") ? "This field is required" : undefined}
+          >
+            <Input
+              type="date"
+              value={visitDate}
+              onChange={(e) => {
+                setVisitDate(e.target.value);
+                clearMissing("visitDate");
+              }}
+            />
           </Field>
         </div>
       </Section>
