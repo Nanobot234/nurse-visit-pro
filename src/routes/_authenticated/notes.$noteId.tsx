@@ -169,6 +169,11 @@ function NotePage() {
         <div className="flex items-center gap-3">
           <h1 className="font-serif text-3xl text-foreground">Nursing visit note</h1>
           <Badge variant={completed ? "default" : "secondary"}>{completed ? "Completed" : "Draft"}</Badge>
+          {completed && isOwner && !editing && (
+            <Button variant="outline" size="sm" onClick={() => setEditing(true)}>
+              Edit note
+            </Button>
+          )}
         </div>
         <p className="text-muted-foreground">JARME Home &amp; Healthcare Services, Inc.</p>
       </header>
