@@ -340,12 +340,25 @@ function NotePage() {
       {!readOnly && (
         <div className="fixed inset-x-0 bottom-0 border-t border-border bg-card/95 backdrop-blur">
           <div className="mx-auto flex w-full max-w-5xl items-center justify-end gap-3 px-4 py-3">
-            <Button variant="outline" onClick={() => save("draft")} disabled={saving}>
-              Save draft
-            </Button>
-            <Button onClick={() => save("completed")} disabled={saving}>
-              {saving ? "Saving…" : "Complete note"}
-            </Button>
+            {completed ? (
+              <>
+                <Button variant="outline" onClick={() => setEditing(false)} disabled={saving}>
+                  Cancel
+                </Button>
+                <Button onClick={() => save("completed")} disabled={saving}>
+                  {saving ? "Saving…" : "Save changes"}
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button variant="outline" onClick={() => save("draft")} disabled={saving}>
+                  Save draft
+                </Button>
+                <Button onClick={() => save("completed")} disabled={saving}>
+                  {saving ? "Saving…" : "Complete note"}
+                </Button>
+              </>
+            )}
           </div>
         </div>
       )}
