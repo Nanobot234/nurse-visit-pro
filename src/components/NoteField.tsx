@@ -29,7 +29,7 @@ export function NoteFieldInput({ field, value, onChange, readOnly, error }: Prop
     <div className={cn("space-y-2", field.width === "full" && "sm:col-span-full")}>
       <Label htmlFor={id}>
         {field.label}
-        {field.required && <span className="text-destructive"></span>}
+        {field.required && <span className="text-destructive"> *</span>}
       </Label>
       {field.suggestions?.length ? (
         <div className="flex flex-wrap gap-1.5">
