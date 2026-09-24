@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useStaff } from "@/components/AppShell";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
@@ -18,6 +19,66 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
 });
 
 function Dashboard() {
+  const { data: staff, isLoading: staffLoading } = useStaff();
+  if (staffLoading) return <p className="text-muted-foreground">Loading…</p>;
+  if (staff?.isAdmin) return <RecentVisits />;
+  return <NurseDashboard />;
+}
+
+function RecentVisits() {
+  const { data, isLoading } = useQuery({
+    queryKey: ["recent-visits"],
+    queryFn: async () => {
+      const { data: notes, error } = await supabase
+        .from("visit_notes")
+        .select("id, patient_name, visit_date, nurse_id, updated_at")
+        .eq("status", "completed")
+        .order("updated_at", { ascending: false })
+        .limit(50);
+      if (error) throw error;
+      const ids = [...new Set(notes.map((n) => n.nurse_id))];
+      const { data: profiles } = ids.length
+        ? await supabase.from("profiles").select("id, full_name, email").in("id", ids)
+        : { data: [] };
+      const names = new Map((profiles ?? []).map((p) => [p.id, p.full_name || p.email || "Nurse"]));
+      return notes.map((n) => ({ ...n, nurse: names.get(n.nurse_id) ?? "Nurse" }));
+    },
+  });
+
+  return (
+    <div className="space-y-8">
+      <div>
+        <h1 className="font-serif text-3xl text-foreground">Recent visits</h1>
+        <p className="mt-1 text-muted-foreground">The latest completed visit notes from all nurses.</p>
+      </div>
+      {isLoading ? (
+        <p className="text-muted-foreground">Loading…</p>
+      ) : !data?.length ? (
+        <div className="rounded-lg border border-dashed border-border p-12 text-center">
+          <p className="font-serif text-lg text-foreground">No completed visits yet</p>
+        </div>
+      ) : (
+        <ul className="divide-y divide-border overflow-hidden rounded-lg border border-border bg-card">
+          {data.map((n) => (
+            <li key={n.id}>
+              <Link
+                to="/notes/$noteId"
+                params={{ noteId: n.id }}
+                className="flex flex-wrap items-center gap-3 px-4 py-3 transition-colors hover:bg-secondary"
+              >
+                <span className="font-medium text-foreground">{n.patient_name || "Untitled patient"}</span>
+                <span className="text-sm text-muted-foreground">{n.visit_date ?? "No date"}</span>
+                <span className="ml-auto text-sm text-muted-foreground">by {n.nurse}</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+function NurseDashboard() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 

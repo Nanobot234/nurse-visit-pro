@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { usePatients } from "@/lib/patients";
 import { useStaff } from "@/components/AppShell";
+import { VoiceButton } from "@/components/VoiceButton";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -153,7 +154,14 @@ function ProgressNotesPage() {
               </Select>
             </div>
             <div className="space-y-2 sm:col-span-2">
-              <Label>Note</Label>
+              <div className="flex items-center justify-between gap-2">
+                <Label>Note</Label>
+                <VoiceButton
+                  onText={(t) =>
+                    setBody((prev) => (prev && !/\s$/.test(prev) ? `${prev} ${t.trimStart()}` : prev + t.trimStart()).slice(0, 4000))
+                  }
+                />
+              </div>
               <Textarea
                 rows={4}
                 maxLength={4000}
@@ -208,7 +216,7 @@ function ProgressNotesPage() {
                       {new Date(note.occurred_at).toLocaleString()}
                     </span>
                     {mine && <span className="text-xs text-muted-foreground">· by you</span>}
-                    {(mine || staff?.isAdmin) && (
+                    {(
                       <Button
                         variant="ghost"
                         size="sm"
