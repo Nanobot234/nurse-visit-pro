@@ -107,6 +107,15 @@ function AdminPage() {
                 <span className="font-medium text-foreground">
                   {note.patient_name || "Untitled patient"}
                 </span>
+                {note.patient_id_number && (
+                  <span className="text-sm text-muted-foreground">ID: {note.patient_id_number}</span>
+                )}
+                {note.nurseName && (
+                  <span className="text-sm text-muted-foreground">Nurse: {note.nurseName}</span>
+                )}
+                {note.aide_name && (
+                  <span className="text-sm text-muted-foreground">Aide: {note.aide_name}</span>
+                )}
                 <span className="text-sm text-muted-foreground">{note.visit_date ?? "No date"}</span>
                 <Badge
                   variant={note.status === "completed" ? "default" : "secondary"}
