@@ -41,7 +41,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               className="text-muted-foreground hover:text-foreground"
               activeProps={{ className: "text-foreground font-medium" }}
             >
-              My notes
+              {staff?.isAdmin ? "Recent visits" : "My notes"}
             </Link>
             <Link
               to="/progress"
