@@ -177,6 +177,7 @@ function EmailForm() {
 
 function PhoneForm() {
   const [phone, setPhone] = useState("");
+  const [fullName, setFullName] = useState("");
   const [code, setCode] = useState("");
   const [sent, setSent] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -190,7 +191,10 @@ function PhoneForm() {
     }
     setBusy(true);
     try {
-      const { error } = await supabase.auth.signInWithOtp({ phone: parsed.data });
+      const { error } = await supabase.auth.signInWithOtp({
+        phone: parsed.data,
+        options: { data: { full_name: fullName.trim().slice(0, 100) } },
+      });
       if (error) throw error;
       setSent(true);
       toast.success("We texted you a code.");
