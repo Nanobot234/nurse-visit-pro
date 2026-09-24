@@ -9,7 +9,7 @@ export const Route = createFileRoute("/api/transcribe")({
       POST: async ({ request }) => {
         const token = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
         if (!token) return new Response("Unauthorized", { status: 401 });
-        const sb = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, {
+        const sb = createClient(process.env['SUPABASE_URL']!, process.env['SUPABASE_PUBLISHABLE_KEY']!, {
           auth: { persistSession: false, autoRefreshToken: false },
         });
         const { data: userData, error: userErr } = await sb.auth.getUser(token);
@@ -23,7 +23,7 @@ export const Route = createFileRoute("/api/transcribe")({
         if (!(file instanceof File) || !file.size || file.size > MAX_BYTES || !file.type.startsWith("audio/")) {
           return new Response("Invalid recording", { status: 400 });
         }
-        const apiKey = process.env.LOVABLE_API_KEY;
+        const apiKey = process.env['LOVABLE_API_KEY'];
         if (!apiKey) return new Response("Voice service not configured", { status: 500 });
 
         const out = new FormData();

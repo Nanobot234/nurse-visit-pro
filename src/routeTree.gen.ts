@@ -16,6 +16,7 @@ import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedPatientsRouteImport } from './routes/_authenticated/patients'
 import { Route as AuthenticatedProgressRouteImport } from './routes/_authenticated/progress'
+import { Route as ApiTranscribeRouteImport } from './routes/api/transcribe'
 import { Route as AuthenticatedNotesNoteIdRouteImport } from './routes/_authenticated/notes.$noteId'
 
 const IndexRoute = IndexRouteImport.update({
@@ -52,6 +53,11 @@ const AuthenticatedProgressRoute = AuthenticatedProgressRouteImport.update({
   path: '/progress',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const ApiTranscribeRoute = ApiTranscribeRouteImport.update({
+  id: '/api/transcribe',
+  path: '/api/transcribe',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedNotesNoteIdRoute =
   AuthenticatedNotesNoteIdRouteImport.update({
     id: '/notes/$noteId',
@@ -66,6 +72,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/patients': typeof AuthenticatedPatientsRoute
   '/progress': typeof AuthenticatedProgressRoute
+  '/api/transcribe': typeof ApiTranscribeRoute
   '/notes/$noteId': typeof AuthenticatedNotesNoteIdRoute
 }
 export interface FileRoutesByTo {
@@ -75,6 +82,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/patients': typeof AuthenticatedPatientsRoute
   '/progress': typeof AuthenticatedProgressRoute
+  '/api/transcribe': typeof ApiTranscribeRoute
   '/notes/$noteId': typeof AuthenticatedNotesNoteIdRoute
 }
 export interface FileRoutesById {
@@ -86,6 +94,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/patients': typeof AuthenticatedPatientsRoute
   '/_authenticated/progress': typeof AuthenticatedProgressRoute
+  '/api/transcribe': typeof ApiTranscribeRoute
   '/_authenticated/notes/$noteId': typeof AuthenticatedNotesNoteIdRoute
 }
 export interface FileRouteTypes {
@@ -97,6 +106,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/patients'
     | '/progress'
+    | '/api/transcribe'
     | '/notes/$noteId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -106,6 +116,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/patients'
     | '/progress'
+    | '/api/transcribe'
     | '/notes/$noteId'
   id:
     | '__root__'
@@ -116,6 +127,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/patients'
     | '/_authenticated/progress'
+    | '/api/transcribe'
     | '/_authenticated/notes/$noteId'
   fileRoutesById: FileRoutesById
 }
@@ -123,6 +135,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ApiTranscribeRoute: typeof ApiTranscribeRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -176,6 +189,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProgressRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/transcribe': {
+      id: '/api/transcribe'
+      path: '/api/transcribe'
+      fullPath: '/api/transcribe'
+      preLoaderRoute: typeof ApiTranscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/notes/$noteId': {
       id: '/_authenticated/notes/$noteId'
       path: '/notes/$noteId'
@@ -209,6 +229,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  ApiTranscribeRoute: ApiTranscribeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
