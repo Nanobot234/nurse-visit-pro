@@ -226,8 +226,20 @@ function PhoneForm() {
     return (
       <form onSubmit={sendCode} className="space-y-4">
         <p className="text-sm text-muted-foreground">
-          First time? Just enter your number — your account is created when you verify the code.
+          First time? Enter your name and number — your account is created when you verify the
+          code.
         </p>
+        <div className="space-y-2">
+          <Label htmlFor="phoneFullName">Full name</Label>
+          <Input
+            id="phoneFullName"
+            autoComplete="name"
+            placeholder="Gladys Aideyan"
+            maxLength={100}
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+          />
+        </div>
         <div className="space-y-2">
           <Label htmlFor="phone">Mobile number</Label>
           <Input
