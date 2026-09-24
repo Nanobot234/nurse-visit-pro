@@ -142,6 +142,7 @@ function EmailForm() {
             onChange={(e) => setFullName(e.target.value)}
             placeholder="Gladys Aideyan"
             maxLength={100}
+            required
           />
         </div>
       )}
@@ -248,6 +249,7 @@ function PhoneForm() {
             maxLength={100}
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
+            required
           />
         </div>
         <div className="space-y-2">
