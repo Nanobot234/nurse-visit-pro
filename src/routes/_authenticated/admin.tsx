@@ -29,7 +29,7 @@ function AdminPage() {
       let query = supabase
         .from("visit_notes")
         .select(
-          "id, patient_name, patient_id_number, visit_date, status, updated_at, aide_name, nurse:profiles!visit_notes_nurse_id_fkey(full_name)"
+          "id, nurse_id, patient_name, patient_id_number, visit_date, status, updated_at, aide_name"
         )
         .order("visit_date", { ascending: false })
         .limit(200);
@@ -37,16 +37,30 @@ function AdminPage() {
       if (term) query = query.ilike("patient_name", `%${term}%`);
       const { data, error } = await query;
       if (error) throw error;
-      return data as {
+      const rows = data as {
         id: string;
+        nurse_id: string;
         patient_name: string;
         patient_id_number: string | null;
         visit_date: string | null;
         status: string;
         updated_at: string;
         aide_name: string | null;
-        nurse: { full_name: string } | null;
       }[];
+
+      const nurseIds = [...new Set(rows.map((r) => r.nurse_id))];
+      const namesById = new Map<string, string>();
+      if (nurseIds.length) {
+        const { data: nurses, error: nurseError } = await supabase
+          .from("profiles")
+          .select("id, full_name")
+          .in("id", nurseIds);
+        if (nurseError) throw nurseError;
+        for (const n of (nurses ?? []) as { id: string; full_name: string }[]) {
+          namesById.set(n.id, n.full_name);
+        }
+      }
+      return rows.map((r) => ({ ...r, nurseName: namesById.get(r.nurse_id) ?? "" }));
     },
   });
 
