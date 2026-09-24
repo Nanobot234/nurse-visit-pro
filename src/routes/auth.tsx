@@ -195,6 +195,10 @@ function PhoneForm() {
       toast.error(parsed.error.issues[0]?.message ?? "Check the number");
       return;
     }
+    if (!signUpNameSchema.safeParse(fullName).success) {
+      toast.error("Enter your full name");
+      return;
+    }
     setBusy(true);
     try {
       const { error } = await supabase.auth.signInWithOtp({
