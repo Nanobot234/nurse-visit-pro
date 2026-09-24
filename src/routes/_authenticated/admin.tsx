@@ -28,14 +28,39 @@ function AdminPage() {
     queryFn: async () => {
       let query = supabase
         .from("visit_notes")
-        .select("id, patient_name, visit_date, status, updated_at")
+        .select(
+          "id, nurse_id, patient_name, patient_id_number, visit_date, status, updated_at, aide_name"
+        )
         .order("visit_date", { ascending: false })
         .limit(200);
       const term = search.trim();
       if (term) query = query.ilike("patient_name", `%${term}%`);
       const { data, error } = await query;
       if (error) throw error;
-      return data;
+      const rows = data as {
+        id: string;
+        nurse_id: string;
+        patient_name: string;
+        patient_id_number: string | null;
+        visit_date: string | null;
+        status: string;
+        updated_at: string;
+        aide_name: string | null;
+      }[];
+
+      const nurseIds = [...new Set(rows.map((r) => r.nurse_id))];
+      const namesById = new Map<string, string>();
+      if (nurseIds.length) {
+        const { data: nurses, error: nurseError } = await supabase
+          .from("profiles")
+          .select("id, full_name")
+          .in("id", nurseIds);
+        if (nurseError) throw nurseError;
+        for (const n of (nurses ?? []) as { id: string; full_name: string }[]) {
+          namesById.set(n.id, n.full_name);
+        }
+      }
+      return rows.map((r) => ({ ...r, nurseName: namesById.get(r.nurse_id) ?? "" }));
     },
   });
 
@@ -82,6 +107,15 @@ function AdminPage() {
                 <span className="font-medium text-foreground">
                   {note.patient_name || "Untitled patient"}
                 </span>
+                {note.patient_id_number && (
+                  <span className="text-sm text-muted-foreground">ID: {note.patient_id_number}</span>
+                )}
+                {note.nurseName && (
+                  <span className="text-sm text-muted-foreground">Nurse: {note.nurseName}</span>
+                )}
+                {note.aide_name && (
+                  <span className="text-sm text-muted-foreground">Aide: {note.aide_name}</span>
+                )}
                 <span className="text-sm text-muted-foreground">{note.visit_date ?? "No date"}</span>
                 <Badge
                   variant={note.status === "completed" ? "default" : "secondary"}
