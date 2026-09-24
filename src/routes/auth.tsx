@@ -34,6 +34,8 @@ const emailSchema = z.object({
   fullName: z.string().trim().max(100).optional(),
 });
 
+const signUpNameSchema = z.string().trim().min(1, "Enter your full name").max(100);
+
 const phoneSchema = z
   .string()
   .trim()
@@ -95,6 +97,10 @@ function EmailForm() {
       toast.error(parsed.error.issues[0]?.message ?? "Check the details you entered");
       return;
     }
+    if (mode === "signup" && !signUpNameSchema.safeParse(fullName).success) {
+      toast.error("Enter your full name");
+      return;
+    }
     setBusy(true);
     try {
       if (mode === "signup") {
@@ -136,6 +142,7 @@ function EmailForm() {
             onChange={(e) => setFullName(e.target.value)}
             placeholder="Gladys Aideyan"
             maxLength={100}
+            required
           />
         </div>
       )}
@@ -189,6 +196,10 @@ function PhoneForm() {
       toast.error(parsed.error.issues[0]?.message ?? "Check the number");
       return;
     }
+    if (!signUpNameSchema.safeParse(fullName).success) {
+      toast.error("Enter your full name");
+      return;
+    }
     setBusy(true);
     try {
       const { error } = await supabase.auth.signInWithOtp({
@@ -238,6 +249,7 @@ function PhoneForm() {
             maxLength={100}
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
+            required
           />
         </div>
         <div className="space-y-2">
