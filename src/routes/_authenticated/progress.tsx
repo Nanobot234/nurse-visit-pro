@@ -19,6 +19,15 @@ import {
 } from "@/components/ui/select";
 
 export const Route = createFileRoute("/_authenticated/progress")({
+  beforeLoad: async () => {
+    const { data: auth } = await supabase.auth.getUser();
+    if (!auth.user) throw redirect({ to: "/auth" });
+    const { data: isAdmin } = await supabase.rpc("has_role", {
+      _user_id: auth.user.id,
+      _role: "admin",
+    });
+    if (!isAdmin) throw redirect({ to: "/dashboard" });
+  },
   head: () => ({
     meta: [
       { title: "Progress notes | JARME" },
