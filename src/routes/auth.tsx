@@ -97,6 +97,10 @@ function EmailForm() {
       toast.error(parsed.error.issues[0]?.message ?? "Check the details you entered");
       return;
     }
+    if (mode === "signup" && !signUpNameSchema.safeParse(fullName).success) {
+      toast.error("Enter your full name");
+      return;
+    }
     setBusy(true);
     try {
       if (mode === "signup") {
