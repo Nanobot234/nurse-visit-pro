@@ -34,6 +34,8 @@ const emailSchema = z.object({
   fullName: z.string().trim().max(100).optional(),
 });
 
+const signUpNameSchema = z.string().trim().min(1, "Enter your full name").max(100);
+
 const phoneSchema = z
   .string()
   .trim()
