@@ -43,13 +43,15 @@ export function AppShell({ children }: { children: ReactNode }) {
             >
               {staff?.isAdmin ? "Recent visits" : "My notes"}
             </Link>
-            <Link
-              to="/progress"
-              className="text-muted-foreground hover:text-foreground"
-              activeProps={{ className: "text-foreground font-medium" }}
-            >
-              Progress notes
-            </Link>
+            {staff?.isAdmin && (
+              <Link
+                to="/progress"
+                className="text-muted-foreground hover:text-foreground"
+                activeProps={{ className: "text-foreground font-medium" }}
+              >
+                Progress notes
+              </Link>
+            )}
             {staff?.isAdmin && (
               <>
                 <Link
