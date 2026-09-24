@@ -221,6 +221,9 @@ function PhoneForm() {
   if (!sent) {
     return (
       <form onSubmit={sendCode} className="space-y-4">
+        <p className="text-sm text-muted-foreground">
+          First time? Just enter your number — your account is created when you verify the code.
+        </p>
         <div className="space-y-2">
           <Label htmlFor="phone">Mobile number</Label>
           <Input
@@ -234,7 +237,7 @@ function PhoneForm() {
           />
         </div>
         <Button type="submit" className="w-full" disabled={busy}>
-          {busy ? "Sending…" : "Text me a code"}
+          {busy ? "Sending…" : "Text me a sign-in code"}
         </Button>
       </form>
     );
@@ -255,7 +258,7 @@ function PhoneForm() {
         />
       </div>
       <Button type="submit" className="w-full" disabled={busy}>
-        {busy ? "Checking…" : "Sign in"}
+        {busy ? "Checking…" : "Verify code & continue"}
       </Button>
       <button
         type="button"
