@@ -28,14 +28,25 @@ function AdminPage() {
     queryFn: async () => {
       let query = supabase
         .from("visit_notes")
-        .select("id, patient_name, visit_date, status, updated_at")
+        .select(
+          "id, patient_name, patient_id_number, visit_date, status, updated_at, aide_name, nurse:profiles!visit_notes_nurse_id_fkey(full_name)"
+        )
         .order("visit_date", { ascending: false })
         .limit(200);
       const term = search.trim();
       if (term) query = query.ilike("patient_name", `%${term}%`);
       const { data, error } = await query;
       if (error) throw error;
-      return data;
+      return data as {
+        id: string;
+        patient_name: string;
+        patient_id_number: string | null;
+        visit_date: string | null;
+        status: string;
+        updated_at: string;
+        aide_name: string | null;
+        nurse: { full_name: string } | null;
+      }[];
     },
   });
 
