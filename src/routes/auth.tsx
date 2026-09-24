@@ -13,15 +13,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Sign in | JARME Nursing Visit Notes" },
+      { title: "Sign in or sign up | JARME Nursing Visit Notes" },
       {
         name: "description",
-        content: "Nurses and office staff sign in with an email address or a mobile number.",
+        content: "Nurses and office staff sign in or create an account with an email address or a mobile number.",
       },
-      { property: "og:title", content: "Sign in | JARME Nursing Visit Notes" },
+      { property: "og:title", content: "Sign in or sign up | JARME Nursing Visit Notes" },
       {
         property: "og:description",
-        content: "Sign in to complete or review nursing visit notes.",
+        content: "Sign in or create an account to complete or review nursing visit notes.",
       },
     ],
   }),
@@ -55,8 +55,11 @@ function AuthPage() {
         </p>
         <Card>
           <CardHeader>
-            <CardTitle className="font-serif text-2xl">Sign in</CardTitle>
-            <CardDescription>Use your work email or your mobile number.</CardDescription>
+            <CardTitle className="font-serif text-2xl">Sign in or create an account</CardTitle>
+            <CardDescription>
+              Use your work email or your mobile number. New here? Entering your details creates
+              your account automatically.
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="email">
