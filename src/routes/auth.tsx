@@ -7,6 +7,7 @@ import { useSession } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -192,10 +193,15 @@ function PhoneForm() {
   const [fullName, setFullName] = useState("");
   const [code, setCode] = useState("");
   const [sent, setSent] = useState(false);
+  const [consented, setConsented] = useState(false);
   const [busy, setBusy] = useState(false);
 
   const sendCode = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!consented) {
+      toast.error("Please check the consent box before we can text you a code");
+      return;
+    }
     const parsed = phoneSchema.safeParse(phone);
     if (!parsed.success) {
       toast.error(parsed.error.issues[0]?.message ?? "Check the number");
@@ -269,15 +275,26 @@ function PhoneForm() {
             required
           />
         </div>
-        <p className="text-xs leading-relaxed text-muted-foreground">
-          By entering your phone number and tapping the button below, you consent to receive
-          one-time authentication codes by SMS from JARME Home &amp; Healthcare Services for
-          account login and verification. Message frequency varies per login attempt. Message and
-          data rates may apply. Reply HELP for help or STOP to cancel. See our{" "}
-          <Link to="/terms" className="underline">Terms &amp; Conditions</Link> and{" "}
-          <Link to="/privacy" className="underline">Privacy Policy</Link>.
-        </p>
-        <Button type="submit" className="w-full" disabled={busy}>
+        <label
+          htmlFor="smsConsent"
+          className="flex items-start gap-3 rounded-md border border-border bg-muted/40 p-3"
+        >
+          <Checkbox
+            id="smsConsent"
+            checked={consented}
+            onCheckedChange={(checked) => setConsented(checked === true)}
+            className="mt-0.5"
+          />
+          <span className="text-xs leading-relaxed text-muted-foreground">
+            By checking this box and entering my phone number, I agree to receive one-time
+            authentication codes by SMS from JARME Home & Healthcare Services. Message
+            frequency varies per login. Msg & data rates may apply. Reply STOP to cancel,
+            HELP for help. See our{" "}
+            <Link to="/terms" className="underline">Terms & Conditions</Link> and{" "}
+            <Link to="/privacy" className="underline">Privacy Policy</Link>.
+          </span>
+        </label>
+        <Button type="submit" className="w-full" disabled={busy || !consented}>
           {busy ? "Sending…" : "Text me a sign-in code"}
         </Button>
       </form>
