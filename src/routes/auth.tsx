@@ -7,6 +7,7 @@ import { useSession } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -192,10 +193,15 @@ function PhoneForm() {
   const [fullName, setFullName] = useState("");
   const [code, setCode] = useState("");
   const [sent, setSent] = useState(false);
+  const [consented, setConsented] = useState(false);
   const [busy, setBusy] = useState(false);
 
   const sendCode = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!consented) {
+      toast.error("Please check the consent box before we can text you a code");
+      return;
+    }
     const parsed = phoneSchema.safeParse(phone);
     if (!parsed.success) {
       toast.error(parsed.error.issues[0]?.message ?? "Check the number");
