@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -78,6 +78,11 @@ function AuthPage() {
             </Tabs>
           </CardContent>
         </Card>
+        <p className="mt-4 text-center text-xs text-muted-foreground">
+          By continuing, you agree to our{" "}
+          <Link to="/terms" className="underline">Terms &amp; Conditions</Link> and{" "}
+          <Link to="/privacy" className="underline">Privacy Policy</Link>.
+        </p>
       </div>
     </main>
   );
@@ -264,6 +269,14 @@ function PhoneForm() {
             required
           />
         </div>
+        <p className="text-xs leading-relaxed text-muted-foreground">
+          By entering your phone number and tapping the button below, you consent to receive
+          one-time authentication codes by SMS from JARME Home &amp; Healthcare Services for
+          account login and verification. Message frequency varies per login attempt. Message and
+          data rates may apply. Reply HELP for help or STOP to cancel. See our{" "}
+          <Link to="/terms" className="underline">Terms &amp; Conditions</Link> and{" "}
+          <Link to="/privacy" className="underline">Privacy Policy</Link>.
+        </p>
         <Button type="submit" className="w-full" disabled={busy}>
           {busy ? "Sending…" : "Text me a sign-in code"}
         </Button>
