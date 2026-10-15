@@ -35,6 +35,10 @@ function ResetPasswordPage() {
   const [waited, setWaited] = useState(false);
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
+  const [current, setCurrent] = useState("");
+  const [isRecovery] = useState(
+    () => typeof window !== "undefined" && window.location.hash.includes("type=recovery"),
+  );
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
@@ -55,12 +59,21 @@ function ResetPasswordPage() {
       toast.error("The two passwords do not match");
       return;
     }
+    if (!isRecovery && !current) {
+      toast.error("Enter your current password");
+      return;
+    }
     setBusy(true);
     try {
-      const { error } = await supabase.auth.updateUser({
-        password: parsed.data,
-        data: { must_change_password: false },
-      });
+      const { error } = await supabase.auth.updateUser(
+        isRecovery
+          ? { password: parsed.data, data: { must_change_password: false } }
+          : ({
+              password: parsed.data,
+              current_password: current,
+              data: { must_change_password: false },
+            } as Parameters<typeof supabase.auth.updateUser>[0]),
+      );
       if (error) throw error;
       toast.success("Password updated. You are signed in.");
       navigate({ to: "/dashboard", replace: true });
@@ -118,6 +131,22 @@ function ResetPasswordPage() {
           </CardHeader>
           <CardContent>
             <form onSubmit={submit} className="space-y-4">
+              {!isRecovery && (
+                <div className="space-y-2">
+                  <Label htmlFor="currentPassword">Current password</Label>
+                  <Input
+                    id="currentPassword"
+                    type="password"
+                    autoComplete="current-password"
+                    value={current}
+                    onChange={(e) => setCurrent(e.target.value)}
+                    required
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    If you were given a temporary password, enter it here.
+                  </p>
+                </div>
+              )}
               <div className="space-y-2">
                 <Label htmlFor="newPassword">New password</Label>
                 <Input
