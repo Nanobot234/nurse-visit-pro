@@ -45,7 +45,7 @@ export async function uploadToPatientFolder(opts: {
   const path = `${PATIENTS_ROOT}/${folder}/${opts.subfolder}/${opts.year}/${opts.fileBase}.pdf`;
   const res = await fetch(
     `${GATEWAY}/sites/${SITE_ID}/drive/root:/${enc(path)}:/content?@microsoft.graph.conflictBehavior=rename`,
-    { method: "PUT", headers: headers({ "Content-Type": "application/pdf" }), body: opts.pdf },
+    { method: "PUT", headers: headers({ "Content-Type": "application/pdf" }), body: new Blob([opts.pdf as Uint8Array<ArrayBuffer>]) },
   );
   if (!res.ok) throw new Error(`SharePoint upload failed [${res.status}]: ${await res.text()}`);
   const json = (await res.json()) as { webUrl?: string };
