@@ -175,7 +175,7 @@ function ProgressNotesPage() {
                 rows={4}
                 maxLength={4000}
                 value={body}
-                placeholder="What happened, who you spoke with, and any follow-up needed."
+                placeholder="Patient Status, who you spoke with, and any follow up needed"
                 onChange={(e) => setBody(e.target.value)}
               />
             </div>
