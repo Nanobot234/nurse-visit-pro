@@ -24,7 +24,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   // Accounts given a temporary password must pick a new one before using the app.
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
-      if (data.user?.user_metadata?.must_change_password) {
+      if (data.user?.user_metadata?.["must_change_password"]) {
         navigate({ to: "/reset-password", replace: true });
       }
     });
