@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { usePatients } from "@/lib/patients";
 import { useStaff } from "@/components/AppShell";
 import { VoiceButton } from "@/components/VoiceButton";
+import { fileProgressNoteToSharePoint } from "@/lib/sharepoint.functions";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -80,18 +81,28 @@ function ProgressNotesPage() {
       if (!patientId) throw new Error("Please choose a patient.");
       if (!body.trim()) throw new Error("Please write the note.");
       const { data: auth } = await supabase.auth.getUser();
-      const { error } = await supabase.from("progress_notes").insert({
-        patient_id: patientId,
-        author_id: auth.user!.id,
-        contact_type: contactType,
-        body: body.trim(),
-      });
+      const { data: inserted, error } = await supabase
+        .from("progress_notes")
+        .insert({
+          patient_id: patientId,
+          author_id: auth.user!.id,
+          contact_type: contactType,
+          body: body.trim(),
+        })
+        .select("id")
+        .single();
       if (error) throw error;
+      return inserted.id;
     },
-    onSuccess: () => {
+    onSuccess: (id) => {
       queryClient.invalidateQueries({ queryKey: ["progress-notes"] });
       setBody("");
       toast.success("Progress note saved.");
+      toast.promise(fileProgressNoteToSharePoint({ data: { id } }), {
+        loading: "Saving PDF to SharePoint…",
+        success: "PDF saved to the patient's SharePoint folder.",
+        error: (e) => `SharePoint copy failed: ${e instanceof Error ? e.message : "unknown error"}`,
+      });
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save the note"),
   });

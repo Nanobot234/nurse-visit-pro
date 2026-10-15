@@ -20,6 +20,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { fileVisitNoteToSharePoint } from "@/lib/sharepoint.functions";
 
 export const Route = createFileRoute("/_authenticated/notes/$noteId")({
   head: () => ({
@@ -159,6 +160,13 @@ function NotePage() {
       if (error) throw error;
       queryClient.invalidateQueries({ queryKey: ["note", noteId] });
       queryClient.invalidateQueries({ queryKey: ["my-notes"] });
+      if (status === "completed") {
+        toast.promise(fileVisitNoteToSharePoint({ data: { id: noteId } }), {
+          loading: "Saving PDF to SharePoint…",
+          success: "PDF saved to the patient's SharePoint folder.",
+          error: (e) => `Note saved, but the SharePoint copy failed: ${e instanceof Error ? e.message : "unknown error"}`,
+        });
+      }
       if (status === "completed" && completed) {
         setEditing(false);
         toast.success("Changes saved.");
