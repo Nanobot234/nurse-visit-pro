@@ -91,10 +91,12 @@ function AuthPage() {
 
 function EmailForm() {
   const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [forgot, setForgot] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [busy, setBusy] = useState(false);
+
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -137,6 +139,59 @@ function EmailForm() {
     }
   };
 
+  const sendReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const parsed = z.string().trim().email("Enter a valid email address").safeParse(email);
+    if (!parsed.success) {
+      toast.error(parsed.error.issues[0]?.message ?? "Enter a valid email address");
+      return;
+    }
+    setBusy(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(parsed.data, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) throw error;
+      toast.success("If that email has an account, we sent a reset link. Check your inbox.");
+      setForgot(false);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not send the reset email");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  if (forgot) {
+    return (
+      <form onSubmit={sendReset} className="space-y-4">
+        <p className="text-sm text-muted-foreground">
+          Enter the email on your account and we will send you a link to set a new password.
+        </p>
+        <div className="space-y-2">
+          <Label htmlFor="resetEmail">Email</Label>
+          <Input
+            id="resetEmail"
+            type="email"
+            autoComplete="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </div>
+        <Button type="submit" className="w-full" disabled={busy}>
+          {busy ? "Sending…" : "Send reset link"}
+        </Button>
+        <button
+          type="button"
+          className="w-full text-sm text-muted-foreground underline-offset-4 hover:underline"
+          onClick={() => setForgot(false)}
+        >
+          Back to sign in
+        </button>
+      </form>
+    );
+  }
+
   return (
     <form onSubmit={submit} className="space-y-4">
       {mode === "signup" && (
@@ -177,6 +232,15 @@ function EmailForm() {
       <Button type="submit" className="w-full" disabled={busy}>
         {busy ? "Please wait…" : mode === "signup" ? "Create account" : "Sign in"}
       </Button>
+      {mode === "signin" && (
+        <button
+          type="button"
+          className="w-full text-sm text-muted-foreground underline-offset-4 hover:underline"
+          onClick={() => setForgot(true)}
+        >
+          Forgot password?
+        </button>
+      )}
       <button
         type="button"
         className="w-full text-sm text-muted-foreground underline-offset-4 hover:underline"
@@ -187,6 +251,7 @@ function EmailForm() {
     </form>
   );
 }
+
 
 function PhoneForm() {
   const [phone, setPhone] = useState("");
