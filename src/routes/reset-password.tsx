@@ -57,7 +57,10 @@ function ResetPasswordPage() {
     }
     setBusy(true);
     try {
-      const { error } = await supabase.auth.updateUser({ password: parsed.data });
+      const { error } = await supabase.auth.updateUser({
+        password: parsed.data,
+        data: { must_change_password: false },
+      });
       if (error) throw error;
       toast.success("Password updated. You are signed in.");
       navigate({ to: "/dashboard", replace: true });
