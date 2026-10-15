@@ -8,6 +8,13 @@
       "when": 1792072742306,
       "tag": "0000_jhhcare_admin_domain",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1792091785616,
+      "tag": "0001_stop_auto_admin_without_email_check",
+      "breakpoints": true
     }
   ]
 }
