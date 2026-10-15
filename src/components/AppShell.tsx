@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchProfileAndRole } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,15 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { data: staff } = useStaff();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+
+  // Accounts given a temporary password must pick a new one before using the app.
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      if (data.user?.user_metadata?.["must_change_password"]) {
+        navigate({ to: "/reset-password", replace: true });
+      }
+    });
+  }, [navigate]);
 
   const signOut = async () => {
     await queryClient.cancelQueries();
@@ -75,6 +84,9 @@ export function AppShell({ children }: { children: ReactNode }) {
             <span className="hidden text-sm text-muted-foreground sm:inline">
               {staff?.displayName}
             </span>
+            <Button asChild variant="ghost" size="sm">
+              <Link to="/reset-password">Change password</Link>
+            </Button>
             <Button variant="ghost" size="sm" onClick={signOut}>
               Sign out
             </Button>
