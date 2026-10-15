@@ -13,3 +13,6 @@
 - [x] Progress notes tab (src/routes/_authenticated/progress.tsx)
 - [ ] Blocked: phone sign-in needs an SMS provider configured in Cloud auth settings
 - [ ] User to extend the form fields in src/lib/visit-note-schema.ts
+- [x] Logo + redesigned nav (menu drawer on phones/tablets)
+- [x] Completed visit notes and new progress notes auto-filed to SharePoint as PDFs
+- [ ] Waiting on user: turn off email confirmation (affects automatic @jhhcare.com admin access)

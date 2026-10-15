@@ -8,3 +8,4 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+- SharePoint filing: PDFs built with pdf-lib in src/lib/sharepoint.server.ts, uploaded via connector gateway to Patients/Patient Information/<patient>/(Nursing Visit Notes|Patient Notes)/<year>/ — matches the agency's existing folder layout.
