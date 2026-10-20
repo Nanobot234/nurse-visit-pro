@@ -89,6 +89,7 @@ export type Database = {
           id: string
           occurred_at: string
           patient_id: string
+          sharepoint_item_id: string | null
           updated_at: string
         }
         Insert: {
@@ -99,6 +100,7 @@ export type Database = {
           id?: string
           occurred_at?: string
           patient_id: string
+          sharepoint_item_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -109,6 +111,7 @@ export type Database = {
           id?: string
           occurred_at?: string
           patient_id?: string
+          sharepoint_item_id?: string | null
           updated_at?: string
         }
         Relationships: [

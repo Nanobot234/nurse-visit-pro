@@ -40,7 +40,7 @@ export async function uploadToPatientFolder(opts: {
   fileBase: string; // e.g. "Nursing Visit Note - 2026-10"
   year: string;
   pdf: Uint8Array;
-}): Promise<string> {
+}): Promise<{ url: string; itemId: string }> {
   const folder = await resolvePatientFolder(opts.patientName);
   const path = `${PATIENTS_ROOT}/${folder}/${opts.subfolder}/${opts.year}/${opts.fileBase}.pdf`;
   const res = await fetch(
@@ -48,8 +48,19 @@ export async function uploadToPatientFolder(opts: {
     { method: "PUT", headers: headers({ "Content-Type": "application/pdf" }), body: new Blob([opts.pdf as Uint8Array<ArrayBuffer>]) },
   );
   if (!res.ok) throw new Error(`SharePoint upload failed [${res.status}]: ${await res.text()}`);
-  const json = (await res.json()) as { webUrl?: string };
-  return json.webUrl ?? "";
+  const json = (await res.json()) as { webUrl?: string; id?: string };
+  return { url: json.webUrl ?? "", itemId: json.id ?? "" };
+}
+
+/** Delete a previously uploaded file. Missing files (already removed) are fine. */
+export async function deleteSharePointItem(itemId: string): Promise<void> {
+  const res = await fetch(`${GATEWAY}/sites/${SITE_ID}/drive/items/${encodeURIComponent(itemId)}`, {
+    method: "DELETE",
+    headers: headers(),
+  });
+  if (!res.ok && res.status !== 404) {
+    throw new Error(`SharePoint delete failed [${res.status}]: ${await res.text()}`);
+  }
 }
 
 // ---------------------------------------------------------------------------

@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { usePatients } from "@/lib/patients";
 import { useStaff } from "@/components/AppShell";
 import { VoiceButton } from "@/components/VoiceButton";
-import { fileProgressNoteToSharePoint } from "@/lib/sharepoint.functions";
+import { fileProgressNoteToSharePoint, deleteProgressNoteEverywhere } from "@/lib/sharepoint.functions";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -60,6 +60,8 @@ function ProgressNotesPage() {
   const [contactType, setContactType] = useState("phone_call");
   const [body, setBody] = useState("");
   const [filterPatient, setFilterPatient] = useState("all");
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editBody, setEditBody] = useState("");
 
   const { data: notes, isLoading } = useQuery({
     queryKey: ["progress-notes", filterPatient],
@@ -109,11 +111,38 @@ function ProgressNotesPage() {
 
   const deleteNote = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("progress_notes").delete().eq("id", id);
-      if (error) throw error;
+      if (!window.confirm("Delete this note? Its PDF will also be removed from SharePoint.")) return false;
+      await deleteProgressNoteEverywhere({ data: { id } });
+      return true;
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["progress-notes"] }),
+    onSuccess: (done) => {
+      if (!done) return;
+      queryClient.invalidateQueries({ queryKey: ["progress-notes"] });
+      toast.success("Note deleted here and in SharePoint.");
+    },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not delete the note"),
+  });
+
+  const updateNote = useMutation({
+    mutationFn: async ({ id, text }: { id: string; text: string }) => {
+      const clean = text.trim();
+      if (!clean) throw new Error("The note can't be empty.");
+      if (clean.length > 5000) throw new Error("The note is too long (5,000 characters max).");
+      const { error } = await supabase.from("progress_notes").update({ body: clean }).eq("id", id);
+      if (error) throw error;
+      return id;
+    },
+    onSuccess: (id) => {
+      queryClient.invalidateQueries({ queryKey: ["progress-notes"] });
+      setEditingId(null);
+      toast.success("Note updated.");
+      toast.promise(fileProgressNoteToSharePoint({ data: { id } }), {
+        loading: "Replacing the PDF in SharePoint…",
+        success: "Old PDF removed and updated PDF saved to SharePoint.",
+        error: (e) => `SharePoint update failed: ${e instanceof Error ? e.message : "unknown error"}`,
+      });
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not update the note"),
   });
 
   const patientName = (id: string) =>
@@ -236,11 +265,20 @@ function ProgressNotesPage() {
                       {new Date(note.occurred_at).toLocaleString()}
                     </span>
                     {mine && <span className="text-xs text-muted-foreground">· by you</span>}
-                    {(
+                    {editingId !== note.id && (
                       <Button
                         variant="ghost"
                         size="sm"
                         className="ml-auto"
+                        onClick={() => { setEditingId(note.id); setEditBody(note.body); }}
+                      >
+                        Edit
+                      </Button>
+                    )}
+                    {(
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         onClick={() => deleteNote.mutate(note.id)}
                         disabled={deleteNote.isPending}
                       >
@@ -248,7 +286,19 @@ function ProgressNotesPage() {
                       </Button>
                     )}
                   </div>
-                  <p className="mt-2 whitespace-pre-wrap text-sm text-foreground">{note.body}</p>
+                  {editingId === note.id ? (
+                    <div className="mt-2 space-y-2">
+                      <Textarea value={editBody} onChange={(e) => setEditBody(e.target.value)} rows={5} maxLength={5000} />
+                      <div className="flex gap-2">
+                        <Button size="sm" onClick={() => updateNote.mutate({ id: note.id, text: editBody })} disabled={updateNote.isPending}>
+                          Save changes
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={() => setEditingId(null)}>Cancel</Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="mt-2 whitespace-pre-wrap text-sm text-foreground">{note.body}</p>
+                  )}
                 </li>
               );
             })}

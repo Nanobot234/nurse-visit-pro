@@ -47,7 +47,7 @@ export const fileVisitNoteToSharePoint = createServerFn({ method: "POST" })
     await pdf.signature("Aide signature", note.aide_signature, note.aide_signed_at);
 
     const date = note.visit_date ?? new Date().toISOString().slice(0, 10);
-    const url = await uploadToPatientFolder({
+    const { url } = await uploadToPatientFolder({
       patientName: note.patient_name,
       subfolder: "Nursing Visit Notes",
       year: date.slice(0, 4),
@@ -70,7 +70,7 @@ export const fileProgressNoteToSharePoint = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(idInput)
   .handler(async ({ data, context }) => {
-    const { NotePdf, uploadToPatientFolder } = await import("./sharepoint.server");
+    const { NotePdf, uploadToPatientFolder, deleteSharePointItem } = await import("./sharepoint.server");
     const { data: note, error } = await context.supabase
       .from("progress_notes").select("*").eq("id", data.id).maybeSingle();
     if (error) throw new Error(error.message);
@@ -93,12 +93,34 @@ export const fileProgressNoteToSharePoint = createServerFn({ method: "POST" })
     pdf.paragraph(note.body);
 
     const ny = when.toLocaleDateString("en-CA", { timeZone: "America/New_York" }); // YYYY-MM-DD
-    const url = await uploadToPatientFolder({
+    const { url, itemId } = await uploadToPatientFolder({
       patientName: patient.full_name,
       subfolder: "Patient Notes",
       year: ny.slice(0, 4),
       fileBase: `Patient Note - ${ny.slice(0, 7)}`,
       pdf: await pdf.save(),
     });
+    // Replace the old copy (if this note was filed before) with the new one.
+    const oldId = note.sharepoint_item_id;
+    const { error: upErr } = await context.supabase
+      .from("progress_notes").update({ sharepoint_item_id: itemId }).eq("id", note.id);
+    if (upErr) throw new Error(upErr.message);
+    if (oldId && oldId !== itemId) await deleteSharePointItem(oldId);
     return { url };
+  });
+
+/** Removes a progress note's PDF from SharePoint, then deletes the note itself. */
+export const deleteProgressNoteEverywhere = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(idInput)
+  .handler(async ({ data, context }) => {
+    const { deleteSharePointItem } = await import("./sharepoint.server");
+    const { data: note, error } = await context.supabase
+      .from("progress_notes").select("id, sharepoint_item_id").eq("id", data.id).maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!note) throw new Error("Progress note not found.");
+    if (note.sharepoint_item_id) await deleteSharePointItem(note.sharepoint_item_id);
+    const { error: delErr } = await context.supabase.from("progress_notes").delete().eq("id", data.id);
+    if (delErr) throw new Error(delErr.message);
+    return { ok: true };
   });
