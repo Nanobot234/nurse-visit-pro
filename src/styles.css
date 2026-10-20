@@ -143,6 +143,12 @@
     border-color: var(--color-border);
   }
 
+  /* Larger base type so older adults can read comfortably.
+     All Tailwind sizes are rem-based, so this scales the whole app. */
+  html {
+    font-size: 118.75%;
+  }
+
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
