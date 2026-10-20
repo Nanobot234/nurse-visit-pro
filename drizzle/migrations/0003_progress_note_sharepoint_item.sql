@@ -1,0 +1,1 @@
+ALTER TABLE public.progress_notes ADD COLUMN IF NOT EXISTS sharepoint_item_id text;
