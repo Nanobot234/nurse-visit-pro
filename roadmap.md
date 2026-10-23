@@ -1,5 +1,7 @@
 # Roadmap
 
+- [x] Separate phone sign-in and signup; prefill country code and keep names signup-only
+
 - [x] Enable Lovable Cloud + email auth
 - [x] Database: profiles, user_roles, visit_notes + RLS
 - [x] Login by email and phone code

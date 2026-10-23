@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/lib/auth";
+import { DEFAULT_PHONE_PREFIX, normalizePhoneNumber, phoneAuthOptions } from "@/lib/phone-auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,6 +25,8 @@ export const Route = createFileRoute("/auth")({
         property: "og:description",
         content: "Sign in or create an account to complete or review nursing visit notes.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: AuthPage,
@@ -60,8 +63,7 @@ function AuthPage() {
           <CardHeader>
             <CardTitle className="font-serif text-2xl">Sign in or create an account</CardTitle>
             <CardDescription>
-              Use your work email or your mobile number. New here? Entering your details creates
-              your account automatically.
+              Sign in with your work email or mobile number, or create a new staff account.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -254,7 +256,9 @@ function EmailForm() {
 
 
 function PhoneForm() {
-  const [phone, setPhone] = useState("");
+  const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [phone, setPhone] = useState(DEFAULT_PHONE_PREFIX);
+  const [sentPhone, setSentPhone] = useState("");
   const [fullName, setFullName] = useState("");
   const [code, setCode] = useState("");
   const [sent, setSent] = useState(false);
@@ -267,12 +271,12 @@ function PhoneForm() {
       toast.error("Please check the consent box before we can text you a code");
       return;
     }
-    const parsed = phoneSchema.safeParse(phone);
+    const parsed = phoneSchema.safeParse(normalizePhoneNumber(phone));
     if (!parsed.success) {
       toast.error(parsed.error.issues[0]?.message ?? "Check the number");
       return;
     }
-    if (!signUpNameSchema.safeParse(fullName).success) {
+    if (mode === "signup" && !signUpNameSchema.safeParse(fullName).success) {
       toast.error("Enter your full name");
       return;
     }
@@ -280,9 +284,10 @@ function PhoneForm() {
     try {
       const { error } = await supabase.auth.signInWithOtp({
         phone: parsed.data,
-        options: { data: { full_name: fullName.trim().slice(0, 100) } },
+        options: phoneAuthOptions(mode, fullName),
       });
       if (error) throw error;
+      setSentPhone(parsed.data);
       setSent(true);
       toast.success("We texted you a code.");
     } catch (err) {
@@ -297,7 +302,7 @@ function PhoneForm() {
     setBusy(true);
     try {
       const { error } = await supabase.auth.verifyOtp({
-        phone: phone.trim(),
+        phone: sentPhone,
         token: code.trim(),
         type: "sms",
       });
@@ -312,10 +317,14 @@ function PhoneForm() {
   if (!sent) {
     return (
       <form onSubmit={sendCode} className="space-y-4">
-        <p className="text-sm text-muted-foreground">
-          First time? Enter your name and number — your account is created when you verify the
-          code.
-        </p>
+        <Tabs value={mode} onValueChange={(value) => setMode(value === "signup" ? "signup" : "signin")}>
+          <TabsList className="grid h-auto w-full grid-cols-2">
+            <TabsTrigger value="signin" className="min-h-12 whitespace-normal text-base">Sign in</TabsTrigger>
+            <TabsTrigger value="signup" className="min-h-12 whitespace-normal text-base">Create account</TabsTrigger>
+          </TabsList>
+        </Tabs>
+        <h2 className="font-serif text-xl">{mode === "signup" ? "Create a phone account" : "Sign in by phone"}</h2>
+        {mode === "signup" && (
         <div className="space-y-2">
           <Label htmlFor="phoneFullName">Full name</Label>
           <Input
@@ -328,13 +337,14 @@ function PhoneForm() {
             required
           />
         </div>
+        )}
         <div className="space-y-2">
           <Label htmlFor="phone">Mobile number</Label>
           <Input
             id="phone"
             type="tel"
             autoComplete="tel"
-            placeholder="+15551234567"
+            placeholder="+1"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             required
@@ -350,7 +360,7 @@ function PhoneForm() {
             onCheckedChange={(checked) => setConsented(checked === true)}
             className="mt-0.5"
           />
-          <span className="text-xs leading-relaxed text-muted-foreground">
+          <span className="text-base leading-relaxed text-muted-foreground">
             By checking this box and entering my phone number, I agree to receive one-time
             authentication codes by SMS from JARME Home & Healthcare Services. Message
             frequency varies per login. Msg & data rates may apply. Reply STOP to cancel,
@@ -360,7 +370,7 @@ function PhoneForm() {
           </span>
         </label>
         <Button type="submit" className="w-full" disabled={busy || !consented}>
-          {busy ? "Sending…" : "Text me a sign-in code"}
+          {busy ? "Sending…" : mode === "signup" ? "Text me a signup code" : "Text me a sign-in code"}
         </Button>
       </form>
     );
@@ -368,6 +378,7 @@ function PhoneForm() {
 
   return (
     <form onSubmit={verify} className="space-y-4">
+      <p className="text-base text-muted-foreground">Code sent to {sentPhone}</p>
       <div className="space-y-2">
         <Label htmlFor="code">6-digit code</Label>
         <Input
@@ -381,15 +392,16 @@ function PhoneForm() {
         />
       </div>
       <Button type="submit" className="w-full" disabled={busy}>
-        {busy ? "Checking…" : "Verify code & continue"}
+        {busy ? "Checking…" : mode === "signup" ? "Verify code & create account" : "Verify code & sign in"}
       </Button>
-      <button
+      <Button
         type="button"
-        className="w-full text-sm text-muted-foreground underline-offset-4 hover:underline"
-        onClick={() => setSent(false)}
+        variant="ghost"
+        className="w-full text-base"
+        onClick={() => { setSent(false); setCode(""); }}
       >
         Use a different number
-      </button>
+      </Button>
     </form>
   );
 }
