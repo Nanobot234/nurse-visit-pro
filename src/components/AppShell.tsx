@@ -65,7 +65,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <Link to="/dashboard" className="flex min-w-0 shrink-0 items-center gap-2.5">
             <img src={logo.url} alt="JARME logo" className="h-10 w-auto shrink-0" />
             <span className="truncate font-serif text-lg leading-tight text-foreground">
-              JARME <span className="hidden sm:inline">Visit Notes</span>
+              JARME <span className="hidden sm:inline">Care Notes</span>
             </span>
           </Link>
 
