@@ -29,6 +29,13 @@
       "when": 1792522356019,
       "tag": "0003_progress_note_sharepoint_item",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1793817007620,
+      "tag": "0004_admin_domain_no_verification",
+      "breakpoints": true
     }
   ]
 }
