@@ -41,9 +41,14 @@ function Index() {
         Keeping up with every patient, so we can provide compassionate, impactful care in every
         home we serve.
       </p>
-      <Button asChild size="lg" className="mt-10">
-        <Link to="/auth">Sign in</Link>
-      </Button>
+      <div className="mt-10 flex w-full max-w-sm flex-col gap-3 sm:flex-row sm:justify-center">
+        <Button asChild size="lg" className="sm:min-w-40">
+          <Link to="/auth">Sign in</Link>
+        </Button>
+        <Button asChild size="lg" variant="outline" className="sm:min-w-40">
+          <Link to="/auth" search={{ mode: "signup" }}>Sign up</Link>
+        </Button>
+      </div>
     </main>
   );
 }

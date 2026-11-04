@@ -29,6 +29,8 @@ export const Route = createFileRoute("/auth")({
       { name: "twitter:card", content: "summary" },
     ],
   }),
+  validateSearch: (search: Record<string, unknown>): { mode?: "signup" } =>
+    search.mode === "signup" ? { mode: "signup" } : {},
   component: AuthPage,
 });
 
@@ -48,6 +50,7 @@ const phoneSchema = z
 function AuthPage() {
   const navigate = useNavigate();
   const { session, loading } = useSession();
+  const startMode = Route.useSearch().mode === "signup" ? "signup" : "signin";
 
   useEffect(() => {
     if (!loading && session) navigate({ to: "/dashboard", replace: true });
@@ -61,7 +64,7 @@ function AuthPage() {
         </p>
         <Card>
           <CardHeader>
-            <CardTitle className="font-serif text-2xl">Sign in or create an account</CardTitle>
+            <CardTitle className="font-serif text-2xl">{startMode === "signup" ? "Create your account" : "Sign in or create an account"}</CardTitle>
             <CardDescription>
               Sign in with your work email or mobile number, or create a new staff account.
             </CardDescription>
@@ -73,10 +76,10 @@ function AuthPage() {
                 <TabsTrigger value="phone">Phone</TabsTrigger>
               </TabsList>
               <TabsContent value="email" className="pt-6">
-                <EmailForm />
+                <EmailForm key={startMode} initialMode={startMode} />
               </TabsContent>
               <TabsContent value="phone" className="pt-6">
-                <PhoneForm />
+                <PhoneForm key={startMode} initialMode={startMode} />
               </TabsContent>
             </Tabs>
           </CardContent>
@@ -91,8 +94,8 @@ function AuthPage() {
   );
 }
 
-function EmailForm() {
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
+function EmailForm({ initialMode = "signin" }: { initialMode?: "signin" | "signup" }) {
+  const [mode, setMode] = useState<"signin" | "signup">(initialMode);
   const [forgot, setForgot] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -255,8 +258,8 @@ function EmailForm() {
 }
 
 
-function PhoneForm() {
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
+function PhoneForm({ initialMode = "signin" }: { initialMode?: "signin" | "signup" }) {
+  const [mode, setMode] = useState<"signin" | "signup">(initialMode);
   const [phone, setPhone] = useState(DEFAULT_PHONE_PREFIX);
   const [sentPhone, setSentPhone] = useState("");
   const [fullName, setFullName] = useState("");
