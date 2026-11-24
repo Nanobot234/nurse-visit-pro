@@ -8,13 +8,7 @@ import { NoteFieldInput } from "@/components/NoteField";
 import { SignaturePad, SignatureImage } from "@/components/SignaturePad";
 import { useStaff } from "@/components/AppShell";
 import { usePatients } from "@/lib/patients";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { PersonPicker } from "@/components/PersonPicker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -55,7 +49,7 @@ function NotePage() {
   const [patientName, setPatientName] = useState("");
   const [patientId, setPatientId] = useState("");
   const [patientRef, setPatientRef] = useState<string | null>(null);
-  const { data: patients } = usePatients();
+  const { data: patients } = usePatients({ kind: "patient" });
   const [visitDate, setVisitDate] = useState("");
   const [answers, setAnswers] = useState<Answers>({});
   const [aidePresent, setAidePresent] = useState(false);
@@ -208,9 +202,12 @@ function NotePage() {
             error={missingKeys.has("patientName") ? "This field is required" : undefined}
           >
             <div className="space-y-2">
-              <Select
+              <PersonPicker
+                people={(patients ?? []).filter((p) => p.active || p.id === patientRef)}
                 value={patientRef ?? "manual"}
-                onValueChange={(value) => {
+                placeholder="Choose a patient"
+                extraOptions={[{ value: "manual", label: "Type a name instead" }]}
+                onChange={(value) => {
                   if (value === "manual") {
                     setPatientRef(null);
                     return;
@@ -223,21 +220,7 @@ function NotePage() {
                     clearMissing("patientName");
                   }
                 }}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Choose a patient" />
-                </SelectTrigger>
-                <SelectContent>
-                  {(patients ?? [])
-                    .filter((p) => p.active || p.id === patientRef)
-                    .map((p) => (
-                      <SelectItem key={p.id} value={p.id}>
-                        {p.full_name}
-                      </SelectItem>
-                    ))}
-                  <SelectItem value="manual">Type a name instead</SelectItem>
-                </SelectContent>
-              </Select>
+              />
               {!patientRef && (
                 <Input
                   value={patientName}

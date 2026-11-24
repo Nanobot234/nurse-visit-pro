@@ -76,15 +76,16 @@ export const fileProgressNoteToSharePoint = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     if (!note) throw new Error("Progress note not found.");
     const [{ data: patient }, { data: author }] = await Promise.all([
-      context.supabase.from("patients").select("full_name, patient_id_number").eq("id", note.patient_id).maybeSingle(),
+      context.supabase.from("patients").select("full_name, patient_id_number, kind").eq("id", note.patient_id).maybeSingle(),
       context.supabase.from("profiles").select("full_name").eq("id", note.author_id).maybeSingle(),
     ]);
     if (!patient) throw new Error("Patient not found.");
 
     const when = new Date(note.occurred_at);
-    const pdf = await NotePdf.create("Patient Progress Note");
+    const isEmployee = patient.kind === "employee";
+    const pdf = await NotePdf.create(isEmployee ? "Employee Progress Note" : "Patient Progress Note");
     pdf.heading("Details");
-    pdf.row("Patient's name", patient.full_name);
+    pdf.row(isEmployee ? "Employee's name" : "Patient's name", patient.full_name);
     pdf.row("ID #", patient.patient_id_number ?? "");
     pdf.row("Date / time", when.toLocaleString("en-US", { timeZone: "America/New_York" }));
     pdf.row("Type of contact", contactLabels[note.contact_type] ?? "Other");
@@ -95,9 +96,10 @@ export const fileProgressNoteToSharePoint = createServerFn({ method: "POST" })
     const ny = when.toLocaleDateString("en-CA", { timeZone: "America/New_York" }); // YYYY-MM-DD
     const { url, itemId } = await uploadToPatientFolder({
       patientName: patient.full_name,
-      subfolder: "Patient Notes",
+      isEmployee,
+      subfolder: isEmployee ? "Employee Notes" : "Patient Notes",
       year: ny.slice(0, 4),
-      fileBase: `Patient Note - ${ny.slice(0, 7)}`,
+      fileBase: `${isEmployee ? "Employee" : "Patient"} Note - ${ny.slice(0, 7)}`,
       pdf: await pdf.save(),
     });
     // Replace the old copy (if this note was filed before) with the new one.

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { usePatients } from "@/lib/patients";
+import { PersonPicker } from "@/components/PersonPicker";
 import { useStaff } from "@/components/AppShell";
 import { VoiceButton } from "@/components/VoiceButton";
 import { fileProgressNoteToSharePoint, deleteProgressNoteEverywhere } from "@/lib/sharepoint.functions";
@@ -80,7 +81,7 @@ function ProgressNotesPage() {
 
   const addNote = useMutation({
     mutationFn: async () => {
-      if (!patientId) throw new Error("Please choose a patient.");
+      if (!patientId) throw new Error("Please choose a patient or employee.");
       if (!body.trim()) throw new Error("Please write the note.");
       const { data: auth } = await supabase.auth.getUser();
       const { data: inserted, error } = await supabase
@@ -102,7 +103,7 @@ function ProgressNotesPage() {
       toast.success("Progress note saved.");
       toast.promise(fileProgressNoteToSharePoint({ data: { id } }), {
         loading: "Saving PDF to SharePoint…",
-        success: "PDF saved to the patient's SharePoint folder.",
+        success: "PDF saved to their SharePoint folder.",
         error: (e) => `SharePoint copy failed: ${e instanceof Error ? e.message : "unknown error"}`,
       });
     },
@@ -146,7 +147,7 @@ function ProgressNotesPage() {
   });
 
   const patientName = (id: string) =>
-    patients?.find((p) => p.id === id)?.full_name ?? "Unknown patient";
+    patients?.find((p) => p.id === id)?.full_name ?? "Unknown";
 
   const noPatients = !patientsLoading && !(patients ?? []).length;
 
@@ -171,21 +172,13 @@ function ProgressNotesPage() {
           <h2 className="font-serif text-xl text-foreground">New note</h2>
           <div className="mt-5 grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label>Patient</Label>
-              <Select value={patientId} onValueChange={setPatientId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Choose a patient" />
-                </SelectTrigger>
-                <SelectContent>
-                  {(patients ?? [])
-                    .filter((p) => p.active)
-                    .map((p) => (
-                      <SelectItem key={p.id} value={p.id}>
-                        {p.full_name}
-                      </SelectItem>
-                    ))}
-                </SelectContent>
-              </Select>
+              <Label>Patient or employee</Label>
+              <PersonPicker
+                people={(patients ?? []).filter((p) => p.active)}
+                value={patientId}
+                onChange={setPatientId}
+                placeholder="Search for a name"
+              />
             </div>
             <div className="space-y-2">
               <Label>Type of contact</Label>
@@ -232,19 +225,12 @@ function ProgressNotesPage() {
         <div className="flex flex-wrap items-center gap-3">
           <h2 className="font-serif text-xl text-foreground">History</h2>
           <div className="ml-auto w-full sm:w-64">
-            <Select value={filterPatient} onValueChange={setFilterPatient}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All patients</SelectItem>
-                {(patients ?? []).map((p) => (
-                  <SelectItem key={p.id} value={p.id}>
-                    {p.full_name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <PersonPicker
+              people={patients ?? []}
+              value={filterPatient}
+              onChange={setFilterPatient}
+              extraOptions={[{ value: "all", label: "Everyone" }]}
+            />
           </div>
         </div>
 

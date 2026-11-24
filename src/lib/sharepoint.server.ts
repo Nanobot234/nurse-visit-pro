@@ -18,10 +18,10 @@ const enc = (path: string) => path.split("/").map(encodeURIComponent).join("/");
 const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
 
 /** Find the existing patient folder name (loose match), else use the cleaned name. */
-async function resolvePatientFolder(patientName: string): Promise<string> {
+async function resolvePatientFolder(patientName: string, root = PATIENTS_ROOT): Promise<string> {
   const target = norm(patientName);
   let url: string | null =
-    `${GATEWAY}/sites/${SITE_ID}/drive/root:/${enc(PATIENTS_ROOT)}:/children?$select=name,folder&$top=200`;
+    `${GATEWAY}/sites/${SITE_ID}/drive/root:/${enc(root)}:/children?$select=name,folder&$top=200`;
   while (url) {
     const res: Response = await fetch(url, { headers: headers() });
     if (!res.ok) throw new Error(`SharePoint folder lookup failed [${res.status}]: ${await res.text()}`);
@@ -34,15 +34,20 @@ async function resolvePatientFolder(patientName: string): Promise<string> {
   return patientName.replace(/[\\/:*?"<>|#%]/g, "-").trim() || "Unknown patient";
 }
 
+const EMPLOYEES_ROOT = "Employees";
+
 export async function uploadToPatientFolder(opts: {
   patientName: string;
-  subfolder: "Nursing Visit Notes" | "Patient Notes";
+  /** Employees file under Employees/<name>/Employee Notes/<year>/ */
+  isEmployee?: boolean;
+  subfolder: "Nursing Visit Notes" | "Patient Notes" | "Employee Notes";
   fileBase: string; // e.g. "Nursing Visit Note - 2026-10"
   year: string;
   pdf: Uint8Array;
 }): Promise<{ url: string; itemId: string }> {
-  const folder = await resolvePatientFolder(opts.patientName);
-  const path = `${PATIENTS_ROOT}/${folder}/${opts.subfolder}/${opts.year}/${opts.fileBase}.pdf`;
+  const root = opts.isEmployee ? EMPLOYEES_ROOT : PATIENTS_ROOT;
+  const folder = await resolvePatientFolder(opts.patientName, root);
+  const path = `${root}/${folder}/${opts.subfolder}/${opts.year}/${opts.fileBase}.pdf`;
   const res = await fetch(
     `${GATEWAY}/sites/${SITE_ID}/drive/root:/${enc(path)}:/content?@microsoft.graph.conflictBehavior=rename`,
     { method: "PUT", headers: headers({ "Content-Type": "application/pdf" }), body: new Blob([opts.pdf as Uint8Array<ArrayBuffer>]) },

@@ -32,7 +32,7 @@ const emptyForm = {
 
 function PatientsPage() {
   const { data: staff, isLoading: staffLoading } = useStaff();
-  const { data: patients, isLoading } = usePatients();
+  const { data: patients, isLoading } = usePatients({ kind: "patient" });
   const queryClient = useQueryClient();
   const [form, setForm] = useState({ ...emptyForm });
   const [editingId, setEditingId] = useState<string | null>(null);

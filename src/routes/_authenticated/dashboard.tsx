@@ -25,6 +25,67 @@ function Dashboard() {
   return <NurseDashboard />;
 }
 
+const contactLabels: Record<string, string> = {
+  phone_call: "Phone call",
+  family_call: "Call from family",
+  visit: "Visit",
+  message: "Message / email",
+  other: "Other",
+};
+
+function LatestProgressNotes() {
+  const { data, isLoading } = useQuery({
+    queryKey: ["progress-notes", "latest"],
+    queryFn: async () => {
+      const { data: notes, error } = await supabase
+        .from("progress_notes")
+        .select("id, patient_id, author_id, occurred_at, contact_type, body")
+        .order("occurred_at", { ascending: false })
+        .limit(10);
+      if (error) throw error;
+      const pIds = [...new Set(notes.map((n) => n.patient_id))];
+      const aIds = [...new Set(notes.map((n) => n.author_id))];
+      const [{ data: people }, { data: authors }] = await Promise.all([
+        pIds.length ? supabase.from("patients").select("id, full_name").in("id", pIds) : Promise.resolve({ data: [] }),
+        aIds.length ? supabase.from("profiles").select("id, full_name, email").in("id", aIds) : Promise.resolve({ data: [] }),
+      ]);
+      const pn = new Map((people ?? []).map((p) => [p.id, p.full_name]));
+      const an = new Map((authors ?? []).map((a) => [a.id, a.full_name || a.email || "Staff"]));
+      return notes.map((n) => ({ ...n, person: pn.get(n.patient_id) ?? "Unknown", author: an.get(n.author_id) ?? "Staff" }));
+    },
+  });
+
+  return (
+    <section className="space-y-3">
+      <div className="flex flex-wrap items-end justify-between gap-2">
+        <h2 className="font-serif text-2xl text-foreground">Latest progress notes</h2>
+        <Link to="/progress" className="text-base font-medium text-primary hover:underline">See all</Link>
+      </div>
+      {isLoading ? (
+        <p className="text-muted-foreground">Loading…</p>
+      ) : !data?.length ? (
+        <div className="rounded-lg border border-dashed border-border p-8 text-center">
+          <p className="font-serif text-lg text-foreground">No progress notes yet</p>
+        </div>
+      ) : (
+        <ul className="space-y-3">
+          {data.map((n) => (
+            <li key={n.id} className="rounded-lg border border-border bg-card p-4">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="font-medium text-foreground">{n.person}</span>
+                <Badge variant="secondary">{contactLabels[n.contact_type] ?? "Other"}</Badge>
+                <span className="text-sm text-muted-foreground">{new Date(n.occurred_at).toLocaleString()}</span>
+                <span className="ml-auto text-sm text-muted-foreground">by {n.author}</span>
+              </div>
+              <p className="mt-2 line-clamp-3 whitespace-pre-wrap text-foreground">{n.body}</p>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
+
 function RecentVisits() {
   const { data, isLoading } = useQuery({
     queryKey: ["recent-visits"],
@@ -34,7 +95,7 @@ function RecentVisits() {
         .select("id, patient_name, visit_date, nurse_id, updated_at")
         .eq("status", "completed")
         .order("updated_at", { ascending: false })
-        .limit(50);
+        .limit(20);
       if (error) throw error;
       const ids = [...new Set(notes.map((n) => n.nurse_id))];
       const { data: profiles } = ids.length
@@ -49,8 +110,10 @@ function RecentVisits() {
     <div className="space-y-8">
       <div>
         <h1 className="font-serif text-3xl text-foreground">Recent visits</h1>
-        <p className="mt-1 text-muted-foreground">The latest completed visit notes from all nurses.</p>
+        <p className="mt-1 text-muted-foreground">The latest visit notes and progress notes.</p>
       </div>
+      <LatestProgressNotes />
+      <h2 className="font-serif text-2xl text-foreground">Latest nursing visit notes</h2>
       {isLoading ? (
         <p className="text-muted-foreground">Loading…</p>
       ) : !data?.length ? (

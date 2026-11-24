@@ -23,6 +23,7 @@ export type Database = {
           date_of_birth: string | null
           full_name: string
           id: string
+          kind: string
           patient_id_number: string | null
           phone: string | null
           updated_at: string
@@ -35,6 +36,7 @@ export type Database = {
           date_of_birth?: string | null
           full_name: string
           id?: string
+          kind?: string
           patient_id_number?: string | null
           phone?: string | null
           updated_at?: string
@@ -47,6 +49,7 @@ export type Database = {
           date_of_birth?: string | null
           full_name?: string
           id?: string
+          kind?: string
           patient_id_number?: string | null
           phone?: string | null
           updated_at?: string
